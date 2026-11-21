@@ -42,26 +42,26 @@
 
 ---
 
-## Phase 3 — Speaking Studio & Audio Engine (S04, S05, S08, S09)
-- [ ] Build **S04 Baseline Setup UX** explaining audio recording and privacy.
-- [ ] Build **S05 / S08 Speaking Studio** matching Stitch `Voice Baseline Assessment`:
+## Phase 3 — Speaking Studio & Audio Engine (S04, S05, S08, S09) (Completed)
+- [x] Build **S04 Baseline Setup UX** explaining audio recording and privacy.
+- [x] Build **S05 / S08 Speaking Studio** matching Stitch `Voice Baseline Assessment`:
   - Microphone permission flow triggered on explicit user action.
   - `MediaRecorder` lifecycle (WebM/Opus) with elapsed timer and 2-minute safety cap.
   - Real-time Web Audio API waveform / volume visualizer.
   - Local recording storage in browser `IndexedDB`.
-- [ ] Build **S09 Recording Review**:
+- [x] Build **S09 Recording Review**:
   - Playback from local IndexedDB audio buffer.
   - Discard and re-record controls.
   - Explicit submission consent modal.
 
 ---
 
-## Phase 4 — Speech Analytics & Cloud Transcription
-- [ ] Implement cloud audio transcription via `firebase/ai` multimodal `generateContent`.
-- [ ] Implement Web Audio API decoding and signal analytics (RMS volume variance, threshold-based pause detection).
-- [ ] Implement pure domain transcript metrics (word count, WPM calculation, regex filler word matching, lexical richness).
-- [ ] Write unit test suite for all calculation algorithms.
-- [ ] Persist session records to Firestore `users/{uid}/sessions/{sessionId}`.
+## Phase 4 — Speech Analytics & Cloud Transcription (Completed)
+- [x] Implement cloud audio transcription via `firebase/ai` multimodal `generateContent`.
+- [x] Implement Web Audio API decoding and signal analytics (RMS volume variance, threshold-based pause detection).
+- [x] Implement pure domain transcript metrics (word count, WPM calculation, regex filler word matching, lexical richness).
+- [x] Write unit test suite for all calculation algorithms.
+- [x] Build **S10 & S11 Speech Analysis & Results** screen with articulate, human-coach copy and interactive transcript evidence.
 
 ---
 
