@@ -9,8 +9,13 @@ describe('App', () => {
     expect(screen.getByText(/Find your voice/i)).toBeInTheDocument()
   })
 
-  it('renders the hybrid AI status indicator', () => {
+  it('renders the get started call to action', () => {
     render(<App />)
-    expect(screen.getByText(/Hybrid AI Engine Ready/i)).toBeInTheDocument()
+    expect(screen.getByText(/Get started/i)).toBeInTheDocument()
+  })
+
+  it('renders the acoustic soundform icon', () => {
+    render(<App />)
+    expect(screen.getByAltText(/Voca Soundform/i)).toBeInTheDocument()
   })
 })

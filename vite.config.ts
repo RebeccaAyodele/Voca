@@ -10,7 +10,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'logo.svg'],
+      includeAssets: ['favicon.ico', 'icon.png', 'apple-touch-icon.png'],
       manifest: {
         name: 'Voca — AI Speaking Coach',
         short_name: 'Voca',
@@ -20,9 +20,9 @@ export default defineConfig({
         display: 'standalone',
         icons: [
           {
-            src: 'logo.svg',
+            src: 'icon.png',
             sizes: '192x192 512x512',
-            type: 'image/svg+xml'
+            type: 'image/png'
           }
         ]
       }

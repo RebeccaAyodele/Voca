@@ -23,7 +23,7 @@
     "noUncheckedIndexedAccess": true,
 
     /* Types */
-    "types": ["@testing-library/jest-dom/vitest", "vitest/globals"],
+    "types": ["vite/client", "@testing-library/jest-dom/vitest", "vitest/globals"],
 
     /* Paths */
     "baseUrl": ".",
