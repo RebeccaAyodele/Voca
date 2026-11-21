@@ -1,47 +1,46 @@
 @import "tailwindcss";
 
 @theme {
-  --font-serif: "Playfair Display", Georgia, serif;
+  --font-display: "Bricolage Grotesque", system-ui, -apple-system, sans-serif;
+  --font-body: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
   --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
 
   --color-voca-tangerine: #f47b45;
+  --color-voca-tangerine-hover: #e2581e;
+  --color-voca-tangerine-subtle: #ffdbce;
   --color-voca-canvas: #fbf9f5;
   --color-voca-surface: #ffffff;
   --color-voca-subtle: #efeeea;
+  --color-voca-surface-low: #f5f3ef;
+  --color-voca-surface-high: #eae8e4;
   --color-voca-ink: #1b1c1a;
-  --color-voca-muted: #6a6966;
+  --color-voca-muted: #695b58;
+  --color-voca-muted-subtle: #8a7268;
   --color-voca-border: #eae5df;
-  --color-voca-border-subtle: #f0ece6;
+  --color-voca-border-subtle: #dec0b5;
   --color-voca-primary: #a23f0a;
-  --color-voca-secondary: #695b58;
+  --color-voca-gold: #c79359;
   --color-voca-success: #25845b;
   --color-voca-warning: #b7791f;
   --color-voca-danger: #ba1a1a;
 }
 
 :root {
-  --voca-tangerine: #f47b45;
-  --voca-ink: #1b1c1a;
-  --voca-muted: #6a6966;
-  --voca-surface: #ffffff;
-  --voca-surface-subtle: #efeeea;
-  --voca-border: #eae5df;
-  --voca-success: #25845b;
-  --voca-warning: #b7791f;
-  --voca-danger: #ba1a1a;
+  --font-display: 'Bricolage Grotesque', system-ui, sans-serif;
+  --font-body: 'Plus Jakarta Sans', system-ui, sans-serif;
 }
 
 body {
-  font-family: var(--font-sans);
+  font-family: var(--font-body);
   background-color: var(--color-voca-canvas);
   color: var(--color-voca-ink);
 }
 
-h1, h2, .font-serif {
-  font-family: var(--font-serif);
+h1, h2, h3, .font-display {
+  font-family: var(--font-display);
 }
 
-/* Tabular numbers for clean metric rendering */
+/* Tabular numbers for clean speech cadence & timer rendering */
 .tabular-nums {
   font-variant-numeric: tabular-nums;
 }
