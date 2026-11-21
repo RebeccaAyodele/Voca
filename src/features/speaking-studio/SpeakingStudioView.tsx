@@ -1,12 +1,20 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, Mic, Square, Timer, Lock, Volume2, RotateCcw, Play, Pause, AlertCircle } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Mic, Square, Timer, Lock, Volume2, RotateCcw, Play, Pause, AlertCircle, Shuffle } from 'lucide-react'
 import { AudioRecorderEngine } from '@/services/audio/recorder'
 import { saveAudioRecording } from '@/services/persistence/indexed-db'
 import type { AudioRecording, RecorderStatus } from '@/services/audio/audio-types'
 
+const PROMPT_OPTIONS = [
+  "Think of an idea or project you genuinely care about. In 15 seconds, explain why it matters to someone hearing it for the first time.",
+  "Share an unexpected lesson you learned from a recent challenge, and how it shifted your perspective.",
+  "Describe what authentic communication means to you, and the vocal presence you want to embody.",
+  "Introduce yourself and the core passion driving your work in three clear, resonant sentences."
+]
+
 export default function SpeakingStudioView() {
   const navigate = useNavigate()
+  const [promptIndex, setPromptIndex] = useState(0)
   const [status, setStatus] = useState<RecorderStatus>('idle')
   const [secondsElapsed, setSecondsElapsed] = useState(0)
   const [recording, setRecording] = useState<AudioRecording | null>(null)
@@ -177,17 +185,23 @@ export default function SpeakingStudioView() {
               </span>
             </div>
             <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPromptIndex((prev) => (prev + 1) % PROMPT_OPTIONS.length)}
+                className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-voca-subtle hover:bg-voca-surface-high text-[10px] font-semibold text-voca-muted hover:text-voca-ink transition-colors cursor-pointer"
+                title="Shuffle prompt"
+              >
+                <Shuffle className="w-3 h-3 text-voca-tangerine" />
+                <span>Shuffle</span>
+              </button>
               <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-voca-subtle text-[10px] font-semibold text-voca-muted tabular-nums">
                 <Timer className="w-3 h-3 text-voca-gold" />
                 0:15s
               </span>
-              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-voca-tangerine-subtle/60 text-[10px] font-semibold text-voca-muted">
-                Natural pace
-              </span>
             </div>
           </div>
           <p className="font-display text-lg text-voca-ink leading-relaxed font-semibold text-center sm:text-left py-2">
-            “Tell us about yourself, or share a story about a memorable day in your life.”
+            “{PROMPT_OPTIONS[promptIndex]}”
           </p>
         </div>
 
