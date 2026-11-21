@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Playfair Display", Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+
+  --color-voca-tangerine: #f47b45;
+  --color-voca-canvas: #fbf9f5;
+  --color-voca-surface: #ffffff;
+  --color-voca-subtle: #efeeea;
+  --color-voca-ink: #1b1c1a;
+  --color-voca-muted: #6a6966;
+  --color-voca-border: #eae5df;
+  --color-voca-border-subtle: #f0ece6;
+  --color-voca-primary: #a23f0a;
+  --color-voca-secondary: #695b58;
+  --color-voca-success: #25845b;
+  --color-voca-warning: #b7791f;
+  --color-voca-danger: #ba1a1a;
+}
+
+:root {
+  --voca-tangerine: #f47b45;
+  --voca-ink: #1b1c1a;
+  --voca-muted: #6a6966;
+  --voca-surface: #ffffff;
+  --voca-surface-subtle: #efeeea;
+  --voca-border: #eae5df;
+  --voca-success: #25845b;
+  --voca-warning: #b7791f;
+  --voca-danger: #ba1a1a;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--color-voca-canvas);
+  color: var(--color-voca-ink);
+}
+
+h1, h2, .font-serif {
+  font-family: var(--font-serif);
+}
+
+/* Tabular numbers for clean metric rendering */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}

@@ -1,0 +1,175 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 500" width="100%" height="100%">
+  <defs>
+    <!-- Vibrant Tangerine, Golden-Orange, and Coral Gradients (pure warm acoustics, no dark or muddy tones) -->
+    <linearGradient id="slice-grad-1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFB385" />
+      <stop offset="50%" stop-color="#F7864F" />
+      <stop offset="100%" stop-color="#E2581E" />
+    </linearGradient>
+
+    <linearGradient id="slice-grad-2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFBE94" />
+      <stop offset="45%" stop-color="#F99462" />
+      <stop offset="100%" stop-color="#EA672D" />
+    </linearGradient>
+
+    <linearGradient id="slice-grad-3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFC9A3" />
+      <stop offset="50%" stop-color="#FA9F72" />
+      <stop offset="100%" stop-color="#F1743B" />
+    </linearGradient>
+
+    <linearGradient id="slice-grad-4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD4B5" />
+      <stop offset="50%" stop-color="#FBAC84" />
+      <stop offset="100%" stop-color="#F5834D" />
+    </linearGradient>
+
+    <linearGradient id="slice-grad-5" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFDEBE" />
+      <stop offset="50%" stop-color="#FFBA96" />
+      <stop offset="100%" stop-color="#FA9665" />
+    </linearGradient>
+
+    <linearGradient id="slice-grad-6" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE7D0" />
+      <stop offset="60%" stop-color="#FFCAA8" />
+      <stop offset="100%" stop-color="#FCA677" />
+    </linearGradient>
+
+    <!-- Warm luminous boundary accent (subtle tone separation instead of black/brown shadows) -->
+    <linearGradient id="warm-seam-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#E05218" stop-opacity="0.35" />
+      <stop offset="50%" stop-color="#D6480F" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#E05218" stop-opacity="0.3" />
+    </linearGradient>
+
+    <filter id="soft-glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#F47B45" flood-opacity="0.2" />
+    </filter>
+
+    <!-- Circular clip path for the sound sphere -->
+    <clipPath id="circle-clip">
+      <circle cx="250" cy="250" r="170" />
+    </clipPath>
+  </defs>
+
+  <!-- Clean Canvas Background -->
+  <rect width="1100" height="500" rx="32" fill="#FBF9F5" />
+
+  <!-- LEFT: CLEAN ACOUSTIC SOUND SPHERE MARK (No brown or black lines) -->
+  <g filter="url(#soft-glow)">
+    <!-- Sphere base filled with warm saturated tangerine rather than dark black/brown -->
+    <circle cx="250" cy="250" r="170" fill="url(#slice-grad-1)" />
+
+    <!-- Clipped nested 3D wave slices echoing the soundform reference with pure warm gradients -->
+    <g clip-path="url(#circle-clip)">
+      
+      <!-- Slice 1 (Far Left wave contour) -->
+      <path d="M 80 80 
+               L 175 80 
+               C 160 145, 138 200, 152 270 
+               C 168 335, 195 385, 195 425 
+               L 80 425 Z" 
+            fill="url(#slice-grad-1)" />
+
+      <!-- Slice 2 (Second undulating crest) -->
+      <path d="M 165 80 
+               L 245 80 
+               C 225 155, 192 205, 210 275 
+               C 228 335, 260 380, 262 425 
+               L 182 425 
+               C 182 385, 155 335, 140 270 
+               C 126 200, 150 145, 165 80 Z" 
+            fill="url(#slice-grad-2)" />
+      <!-- Clean, warm dividing contour (warm tone, no brown/black) -->
+      <path d="M 165 80 C 150 145, 126 200, 140 270 C 155 335, 182 385, 182 425" 
+            fill="none" stroke="url(#warm-seam-grad)" stroke-width="2.5" />
+
+      <!-- Slice 3 (Third undulating crest - Middle Wave) -->
+      <path d="M 235 80 
+               L 318 80 
+               C 298 150, 252 200, 272 280 
+               C 290 340, 328 385, 328 425 
+               L 250 425 
+               C 248 380, 216 335, 198 275 
+               C 180 205, 215 155, 235 80 Z" 
+            fill="url(#slice-grad-3)" />
+      <!-- Clean warm dividing contour -->
+      <path d="M 235 80 C 215 155, 180 205, 198 275 C 216 335, 248 380, 250 425" 
+            fill="none" stroke="url(#warm-seam-grad)" stroke-width="2.5" />
+
+      <!-- Slice 4 (Fourth undulating crest) -->
+      <path d="M 308 80 
+               L 392 80 
+               C 372 155, 325 210, 342 270 
+               C 358 325, 395 375, 398 425 
+               L 318 425 
+               C 318 385, 280 340, 262 280 
+               C 242 200, 288 150, 308 80 Z" 
+            fill="url(#slice-grad-4)" />
+      <!-- Clean warm dividing contour -->
+      <path d="M 308 80 C 288 150, 242 200, 262 280 C 280 340, 318 385, 318 425" 
+            fill="none" stroke="url(#warm-seam-grad)" stroke-width="2.5" />
+
+      <!-- Slice 5 (Fifth curved acoustic crest) -->
+      <path d="M 382 80 
+               L 430 80 
+               L 430 220
+               C 405 250, 375 285, 382 325
+               C 390 365, 410 395, 415 425
+               L 388 425 
+               C 385 375, 348 325, 332 270 
+               C 315 210, 362 155, 382 80 Z" 
+            fill="url(#slice-grad-5)" />
+      <!-- Clean warm dividing contour -->
+      <path d="M 382 80 C 362 155, 315 210, 332 270 C 348 325, 385 375, 388 425" 
+            fill="none" stroke="url(#warm-seam-grad)" stroke-width="2.5" />
+
+      <!-- Slice 6 (Far Right highlight shelf) -->
+      <path d="M 418 80 
+               L 430 80 
+               L 430 425 
+               L 405 425
+               C 400 395, 380 365, 372 325
+               C 365 285, 395 250, 420 220 
+               C 420 160, 418 110, 418 80 Z" 
+            fill="url(#slice-grad-6)" />
+
+      <!-- Subtle inner ambient edge rim -->
+      <circle cx="250" cy="250" r="169" fill="none" stroke="#FFD8BE" stroke-width="2.5" opacity="0.6" />
+    </g>
+  </g>
+
+  <!-- VERTICAL DIVIDER -->
+  <line x1="510" y1="130" x2="510" y2="370" stroke="#E6E1D8" stroke-width="1.5" />
+
+  <!-- RIGHT: TYPOGRAPHIC IDENTITY LOCKUP -->
+  <g transform="translate(565, 0)">
+    
+    <!-- Micro System Pill Badge -->
+    <g transform="translate(0, 142)">
+      <rect width="182" height="26" rx="13" fill="#F47B45" fill-opacity="0.12" />
+      <circle cx="14" cy="13" r="3.5" fill="#F47B45" />
+      <text x="26" y="17" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="10.5" font-weight="700" letter-spacing="1.2" fill="#D94E15">SPEECH &amp; RESONANCE</text>
+    </g>
+
+    <!-- Brand Wordmark: "Voca" in Playfair Display serif -->
+    <text x="0" y="248" font-family="'Playfair Display', Georgia, serif" font-size="96" font-weight="700" letter-spacing="-1.5" fill="#1B1C1A">Voca</text>
+
+    <!-- Core Tagline: "Find your voice. Express yourself." -->
+    <text x="2" y="295" font-family="'Playfair Display', Georgia, serif" font-size="23" font-style="italic" font-weight="600" fill="#F47B45">Find your voice. Express yourself.</text>
+
+    <!-- Descriptor line -->
+    <text x="2" y="334" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-size="14" font-weight="500" letter-spacing="0.2" fill="#6A6966">Deliberate communication development &amp; vocal resonance</text>
+
+    <!-- Cadence rhythm markers -->
+    <g transform="translate(2, 362)" fill="#E0DCD5">
+      <circle cx="4" cy="0" r="3.5" fill="#F47B45" />
+      <circle cx="20" cy="0" r="3" />
+      <circle cx="34" cy="0" r="3" />
+      <circle cx="48" cy="0" r="3" />
+      <circle cx="62" cy="0" r="3" fill="#F47B45" opacity="0.5" />
+    </g>
+  </g>
+</svg>
