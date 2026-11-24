@@ -1,6 +1,5 @@
 export type SpeakingGoal =
   | 'public-speaking'
-  | 'executive-presence'
   | 'social-confidence'
   | 'clarity-articulation'
   | 'interviews-pitches'

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, ArrowRight, Check, Award, Briefcase, MessageSquare, Volume2, Mic } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, Award, MessageSquare, Volume2, Mic } from 'lucide-react'
 import { useAuthStore } from '@/features/auth/authStore'
 import type { SpeakingGoal } from '@/domain/user/types'
 
@@ -17,12 +17,6 @@ const GOAL_OPTIONS: GoalOption[] = [
     title: 'Public Speaking & Keynotes',
     description: 'Command rooms with poise, clear projection, and breath control.',
     icon: Award
-  },
-  {
-    id: 'executive-presence',
-    title: 'Executive Presence & Meetings',
-    description: 'Speak with authority, eliminate filler words, and hold gravitas.',
-    icon: Briefcase
   },
   {
     id: 'social-confidence',

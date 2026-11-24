@@ -48,7 +48,7 @@ You are implementing Voca, a polished AI-powered speaking and communication-deve
 - Before submission verify supported Chrome version, Firebase JS SDK version, model availability, rules, public repo/licence, demo video length and all current eligibility/deadline requirements.
 
 ## Working style
-1. Read `README.md`, `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/TECHNICAL_IMPLEMENTATION.md` and `docs/DESIGN_SYSTEM.md` before making substantial changes.
+1. Read `README.md`, `docs/PRD.md`, `docs/ARCHITECTURE.md`, `docs/TECHNICAL_IMPLEMENTATION.md` and `docs/DESIGN_SYSTEM.md` before making substantial changes. Always thoroughly read all relevant project documents and crosscheck dependencies before executing any changes.
 2. Inspect the existing repository before editing; do not overwrite working code or design decisions.
 3. Implement in small vertical slices. After each slice, run typecheck, tests and build.
 4. Update `docs/IMPLEMENTATION_PLAN.md` and `README.md` as implementation changes.

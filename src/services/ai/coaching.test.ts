@@ -81,7 +81,7 @@ describe('generateCoachingFeedback fallback', () => {
       mockTranscript,
       mockTranscriptMetrics,
       mockSignalMetrics,
-      ['executive-presence']
+      ['public-speaking']
     )
 
     expect(feedback).toBeDefined()

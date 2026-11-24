@@ -9,7 +9,6 @@ export default function DashboardView() {
   const primaryGoal = profile?.goals?.[0] || 'public-speaking'
   const goalLabels: Record<string, string> = {
     'public-speaking': 'Public Speaking & Keynotes',
-    'executive-presence': 'Executive Presence & Meetings',
     'social-confidence': 'Everyday Social Confidence',
     'clarity-articulation': 'Vocal Clarity & Articulation',
     'interviews-pitches': 'High-Stakes Interviews & Pitches'
