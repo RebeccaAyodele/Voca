@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { ArrowRight, Sparkles, TrendingUp, Award, Flame, Compass } from 'lucide-react'
+import { ArrowRight, Flame, Compass, BookOpen } from 'lucide-react'
 import { useAuthStore } from '@/features/auth/authStore'
 import { TODAY_DAILY_CHALLENGE } from '@/domain/challenges'
 
@@ -7,132 +7,102 @@ export default function DashboardView() {
   const navigate = useNavigate()
   const profile = useAuthStore((state) => state.profile)
 
-  const primaryGoal = profile?.goals?.[0] || 'public-speaking'
-  const goalLabels: Record<string, string> = {
-    'public-speaking': 'Public Speaking & Keynotes',
-    'social-confidence': 'Everyday Social Confidence',
-    'clarity-articulation': 'Vocal Clarity & Articulation',
-    'interviews-pitches': 'High-Stakes Interviews & Pitches'
-  }
+  const displayName = profile?.displayName || (profile?.isAnonymous ? 'Guest' : 'Speaker')
 
   return (
-    <div className="px-4 sm:px-6 py-8 max-w-4xl mx-auto space-y-6">
-      {/* Welcome Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="px-4 sm:px-6 py-8 max-w-xl mx-auto space-y-6">
+      {/* Welcome & Streak Header */}
+      <div className="flex items-center justify-between">
         <div>
-          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-voca-tangerine-subtle/60 text-voca-primary text-[10px] font-bold uppercase tracking-wider font-display mb-2">
-            <Sparkles className="w-3 h-3 text-voca-tangerine" />
-            <span>Calibrated for {goalLabels[primaryGoal]}</span>
-          </div>
-          <h1 className="font-display text-3xl sm:text-4xl font-extrabold text-voca-ink tracking-tight">
-            Your Speaking Practice
+          <span className="text-xs font-semibold text-voca-muted font-display block">Welcome back,</span>
+          <h1 className="font-display text-3xl font-extrabold text-voca-ink tracking-tight">
+            {displayName}
           </h1>
-          <p className="text-sm text-voca-muted font-body mt-1">
-            Deliberate speaking exercises and daily challenges build lasting poise and resonance.
+        </div>
+
+        {/* Practice Streak Badge */}
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-voca-surface border border-voca-border shadow-2xs">
+          <Flame className="w-4 h-4 text-voca-tangerine" />
+          <span className="text-xs font-bold text-voca-ink font-display">3 days</span>
+        </div>
+      </div>
+
+      {/* Hero: ONE THING TO DO TODAY */}
+      <div className="relative rounded-3xl bg-voca-surface border border-voca-border p-6 sm:p-7 shadow-xs overflow-hidden flex flex-col justify-between gap-6">
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-voca-primary font-display bg-voca-tangerine-subtle px-2.5 py-0.5 rounded-full">
+              Today's Recommended Practice
+            </span>
+            <span className="text-xs text-voca-muted font-body">5–10 min</span>
+          </div>
+
+          <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-voca-ink tracking-tight pt-1">
+            {TODAY_DAILY_CHALLENGE.title}
+          </h2>
+
+          <p className="text-sm text-voca-muted font-body leading-relaxed">
+            Can you express a complete thought in just one minute? Practice spontaneous speaking with steady cadence and natural poise.
           </p>
         </div>
 
+        {/* Primary Action Button */}
         <button
-          onClick={() => navigate('/challenges')}
+          onClick={() => navigate(`/studio?challengeId=${TODAY_DAILY_CHALLENGE.id}`)}
           type="button"
-          className="self-start sm:self-auto h-12 px-6 rounded-full bg-voca-tangerine hover:bg-voca-tangerine-hover text-voca-surface font-display font-bold text-sm flex items-center gap-2 shadow-md shadow-voca-tangerine/20 cursor-pointer active:scale-95 transition-all"
+          className="w-full h-14 rounded-full bg-voca-tangerine hover:bg-voca-tangerine-hover text-voca-surface font-display font-bold text-base flex items-center justify-center gap-2 shadow-lg shadow-voca-tangerine/20 cursor-pointer active:scale-[0.98] transition-all"
         >
-          <Flame className="w-4 h-4" />
-          <span>Explore Challenges</span>
+          <span>Start Today's Practice (5 mins)</span>
+          <ArrowRight className="w-5 h-5" />
         </button>
       </div>
 
-      {/* Main Practice Launcher Hero Card: Today's Daily Challenge */}
-      <div className="relative rounded-3xl bg-voca-surface border border-voca-border p-6 sm:p-7 shadow-xs overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div className="space-y-2 max-w-lg">
-          <div className="flex items-center gap-2 text-voca-primary text-xs font-bold font-display uppercase tracking-wider">
-            <span className="w-2 h-2 rounded-full bg-voca-tangerine animate-ping"></span>
-            <span>Today's Daily Challenge</span>
-            <span className="text-voca-muted font-normal">• 5–10 min</span>
-          </div>
-          <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-voca-ink">
-            {TODAY_DAILY_CHALLENGE.title}
-          </h2>
-          <p className="text-sm text-voca-muted font-body leading-relaxed">
-            {TODAY_DAILY_CHALLENGE.mission}
-          </p>
-          <div className="flex items-center gap-2 pt-1">
-            <span className="text-xs font-semibold text-voca-muted">
-              Skills: <span className="text-voca-ink">{TODAY_DAILY_CHALLENGE.skillsAssessed.join(' · ')}</span>
+      {/* Quiet Below-the-Fold Secondary Links */}
+      <div className="pt-2 space-y-3">
+        <span className="text-xs font-bold uppercase tracking-wider text-voca-muted font-display block">
+          More Practice &amp; Growth
+        </span>
+
+        <div className="grid grid-cols-2 gap-3">
+          {/* Library Link */}
+          <div
+            onClick={() => navigate('/challenges')}
+            className="p-4 rounded-2xl bg-voca-surface border border-voca-border hover:border-voca-tangerine hover:shadow-2xs transition-all cursor-pointer group flex flex-col justify-between"
+          >
+            <div>
+              <div className="w-8 h-8 rounded-xl bg-voca-tangerine-subtle text-voca-primary flex items-center justify-center mb-2">
+                <BookOpen className="w-4 h-4" />
+              </div>
+              <h3 className="font-display font-bold text-sm text-voca-ink group-hover:text-voca-primary transition-colors">
+                All Challenges
+              </h3>
+              <p className="text-[11px] text-voca-muted font-body mt-0.5">12 speaking exercises</p>
+            </div>
+            <span className="mt-3 text-xs font-bold text-voca-primary font-display flex items-center gap-1 self-start">
+              <span>Browse</span>
+              <ArrowRight className="w-3 h-3" />
             </span>
           </div>
-        </div>
 
-        <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto shrink-0">
-          <button
-            onClick={() => navigate(`/studio?challengeId=${TODAY_DAILY_CHALLENGE.id}`)}
-            type="button"
-            className="w-full sm:w-auto h-12 px-6 rounded-full bg-voca-tangerine hover:bg-voca-tangerine-hover text-voca-surface font-display font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md active:scale-95"
-          >
-            <span>Start Today's Challenge</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => navigate('/challenges')}
-            type="button"
-            className="w-full sm:w-auto h-12 px-5 rounded-full bg-voca-surface-low hover:bg-voca-surface-high border border-voca-border text-voca-ink font-display font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-all"
-          >
-            <span>View Library (12)</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Quick Metrics & Skills Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {/* Baseline Status Card */}
-        <div className="p-5 rounded-2xl bg-voca-surface border border-voca-border shadow-xs flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between text-voca-muted mb-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider font-display">Baseline Status</span>
-              <Award className="w-4 h-4 text-voca-gold" />
-            </div>
-            <p className="font-display text-xl font-bold text-voca-ink">Calibrated</p>
-            <p className="text-xs text-voca-muted font-body mt-1">15s voice sample recorded and analyzed.</p>
-          </div>
-          <button
-            onClick={() => navigate('/analysis?recId=demo')}
-            className="mt-4 text-xs font-bold text-voca-primary hover:underline font-display flex items-center gap-1 self-start cursor-pointer"
-          >
-            <span>Review baseline results</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {/* Cadence Range */}
-        <div className="p-5 rounded-2xl bg-voca-surface border border-voca-border shadow-xs flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between text-voca-muted mb-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider font-display">Target Cadence</span>
-              <TrendingUp className="w-4 h-4 text-voca-success" />
-            </div>
-            <p className="font-display text-xl font-bold text-voca-ink tabular-nums">135–155 WPM</p>
-            <p className="text-xs text-voca-muted font-body mt-1">Ideal pocket for poise and audience retention.</p>
-          </div>
-          <span className="mt-4 text-[11px] text-voca-success font-semibold font-body">Pacing dialed in</span>
-        </div>
-
-        {/* Skill Map Shortcut */}
-        <div className="p-5 rounded-2xl bg-voca-surface border border-voca-border shadow-xs flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between text-voca-muted mb-2">
-              <span className="text-[10px] font-bold uppercase tracking-wider font-display">Skill Radar</span>
-              <Compass className="w-4 h-4 text-voca-primary" />
-            </div>
-            <p className="font-display text-xl font-bold text-voca-ink">6 Dimensions</p>
-            <p className="text-xs text-voca-muted font-body mt-1">Fluency, pace, structure, clarity, and conciseness.</p>
-          </div>
-          <button
+          {/* Skill Map Link */}
+          <div
             onClick={() => navigate('/skills')}
-            className="mt-4 text-xs font-bold text-voca-primary hover:underline font-display flex items-center gap-1 self-start cursor-pointer"
+            className="p-4 rounded-2xl bg-voca-surface border border-voca-border hover:border-voca-tangerine hover:shadow-2xs transition-all cursor-pointer group flex flex-col justify-between"
           >
-            <span>Explore Skill Map</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
+            <div>
+              <div className="w-8 h-8 rounded-xl bg-voca-surface-low text-voca-muted flex items-center justify-center mb-2">
+                <Compass className="w-4 h-4 text-voca-primary" />
+              </div>
+              <h3 className="font-display font-bold text-sm text-voca-ink group-hover:text-voca-primary transition-colors">
+                Skill Radar
+              </h3>
+              <p className="text-[11px] text-voca-muted font-body mt-0.5">6 communication dimensions</p>
+            </div>
+            <span className="mt-3 text-xs font-bold text-voca-primary font-display flex items-center gap-1 self-start">
+              <span>View Map</span>
+              <ArrowRight className="w-3 h-3" />
+            </span>
+          </div>
         </div>
       </div>
     </div>

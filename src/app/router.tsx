@@ -8,6 +8,7 @@ import DashboardView from '@/features/dashboard/DashboardView'
 import ChallengesView from '@/features/challenges/ChallengesView'
 import SkillMapView from '@/features/skill-map/SkillMapView'
 import ProgressView from '@/features/progress/ProgressView'
+import ProfileView from '@/features/profile/ProfileView'
 import AppLayout from '@/components/layout/AppLayout'
 
 export const router = createBrowserRouter([
@@ -49,6 +50,10 @@ export const router = createBrowserRouter([
       {
         path: '/progress',
         element: <ProgressView />
+      },
+      {
+        path: '/profile',
+        element: <ProfileView />
       }
     ]
   }

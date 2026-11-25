@@ -10,11 +10,10 @@ import {
   TrendingUp,
   Cpu,
   RefreshCw,
-  Clock,
-  Mic,
-  Activity,
   RotateCcw,
-  Compass
+  Compass,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react'
 import { getAudioRecording } from '@/services/persistence/indexed-db'
 import { analyzeAudioSignal, type AudioSignalMetrics } from '@/services/audio/signal-analysis'
@@ -43,6 +42,7 @@ export default function AnalysisResultsView() {
   const [signalMetrics, setSignalMetrics] = useState<AudioSignalMetrics | null>(null)
   const [transcriptMetrics, setTranscriptMetrics] = useState<TranscriptMetrics | null>(null)
   const [feedback, setFeedback] = useState<CoachingFeedback | null>(null)
+  const [isTranscriptOpen, setIsTranscriptOpen] = useState(false)
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
@@ -232,99 +232,78 @@ export default function AnalysisResultsView() {
           </div>
         )}
 
-        {/* Objective Speech Metrics 4-Grid */}
-        {transcriptMetrics && signalMetrics && (
-          <div className="grid grid-cols-2 gap-3 mb-5">
-            {/* Speaking Pace */}
-            <div className="p-4 rounded-xl bg-voca-surface border border-voca-border shadow-xs flex flex-col justify-between">
-              <div className="flex items-center justify-between text-voca-muted mb-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider font-display">Pace (WPM)</span>
-                <Clock className="w-3.5 h-3.5 text-voca-gold" />
-              </div>
-              <div className="flex items-baseline gap-1 my-1">
-                <span className="font-display text-2xl font-extrabold text-voca-ink tabular-nums">
-                  {transcriptMetrics.wordsPerMinute}
-                </span>
-                <span className="text-xs text-voca-muted">wpm</span>
-              </div>
-              <span className="text-[11px] text-voca-muted">Target: 130–160 wpm</span>
-            </div>
+        {/* Human Delivery Rhythm & Pacing */}
+        {transcriptMetrics && (
+          <div className="rounded-2xl bg-voca-surface p-5 border border-voca-border shadow-xs mb-5 space-y-3">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-voca-primary font-display">
+              Delivery Rhythm
+            </span>
 
-            {/* Filler Words */}
-            <div className="p-4 rounded-xl bg-voca-surface border border-voca-border shadow-xs flex flex-col justify-between">
-              <div className="flex items-center justify-between text-voca-muted mb-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider font-display">Fillers</span>
-                <Mic className="w-3.5 h-3.5 text-voca-primary" />
-              </div>
-              <div className="flex items-baseline gap-1 my-1">
-                <span className="font-display text-2xl font-extrabold text-voca-ink tabular-nums">
-                  {transcriptMetrics.fillerWordCount}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs font-body">
+                <span className="text-voca-muted">Pacing</span>
+                <span className="font-bold text-voca-ink">
+                  {transcriptMetrics.wordsPerMinute < 115
+                    ? 'Deliberate & Measured'
+                    : transcriptMetrics.wordsPerMinute > 170
+                    ? 'Energetic & Fast'
+                    : 'Natural & Balanced'}
                 </span>
-                <span className="text-xs text-voca-muted">words</span>
               </div>
-              <span className="text-[11px] text-voca-muted">
-                {transcriptMetrics.fillerPercentage}% of tokens
-              </span>
-            </div>
-
-            {/* Pause Cadence */}
-            <div className="p-4 rounded-xl bg-voca-surface border border-voca-border shadow-xs flex flex-col justify-between">
-              <div className="flex items-center justify-between text-voca-muted mb-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider font-display">Pauses</span>
-                <Activity className="w-3.5 h-3.5 text-voca-tangerine" />
-              </div>
-              <div className="flex items-baseline gap-1 my-1">
-                <span className="font-display text-2xl font-extrabold text-voca-ink tabular-nums">
-                  {signalMetrics.pauseCount}
+              <div className="flex items-center justify-between text-xs font-body">
+                <span className="text-voca-muted">Flow & Continuity</span>
+                <span className="font-bold text-voca-ink">
+                  {transcriptMetrics.fillerPercentage <= 4 ? 'Smooth & Composed' : 'Natural conversational flow'}
                 </span>
-                <span className="text-xs text-voca-muted">pauses</span>
               </div>
-              <span className="text-[11px] text-voca-muted">
-                Avg: {signalMetrics.averagePauseDuration}s
-              </span>
-            </div>
-
-            {/* Active Speech Duration */}
-            <div className="p-4 rounded-xl bg-voca-surface border border-voca-border shadow-xs flex flex-col justify-between">
-              <div className="flex items-center justify-between text-voca-muted mb-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider font-display">Duration</span>
-                <TrendingUp className="w-3.5 h-3.5 text-voca-success" />
-              </div>
-              <div className="flex items-baseline gap-1 my-1">
-                <span className="font-display text-2xl font-extrabold text-voca-ink tabular-nums">
-                  {signalMetrics.speakingDurationSeconds}
+              <div className="flex items-center justify-between text-xs font-body">
+                <span className="text-voca-muted">Pausing</span>
+                <span className="font-bold text-voca-ink">
+                  {signalMetrics && signalMetrics.pauseCount > 0
+                    ? `${signalMetrics.pauseCount} thoughtful breath pauses`
+                    : 'Continuous delivery'}
                 </span>
-                <span className="text-xs text-voca-muted">/ {signalMetrics.durationSeconds}s</span>
               </div>
-              <span className="text-[11px] text-voca-muted">Active speech</span>
             </div>
           </div>
         )}
 
-        {/* Audio Player & Verbatim Transcript with Evidence Highlights */}
-        <div className="rounded-2xl bg-voca-surface p-5 border border-voca-border shadow-xs mb-5">
-          <div className="flex items-center justify-between pb-3 mb-3 border-b border-voca-surface-low">
-            <div className="flex items-center gap-2">
+        {/* Audio Player & Collapsible Transcript */}
+        <div className="rounded-2xl bg-voca-surface p-4 border border-voca-border shadow-xs mb-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
               <button
                 onClick={togglePlayAudio}
                 type="button"
-                className="w-9 h-9 rounded-full bg-voca-tangerine hover:bg-voca-tangerine-hover text-voca-surface flex items-center justify-center shadow-xs cursor-pointer active:scale-95 transition-all"
+                className="w-10 h-10 rounded-full bg-voca-tangerine hover:bg-voca-tangerine-hover text-voca-surface flex items-center justify-center shadow-xs cursor-pointer active:scale-95 transition-all"
                 aria-label={isPlaying ? 'Pause sample' : 'Play audio sample'}
               >
-                {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
+                {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
               </button>
-              <span className="font-display font-bold text-xs uppercase tracking-wider text-voca-ink">
-                Spoken Transcript
-              </span>
+              <div>
+                <p className="font-display font-bold text-sm text-voca-ink">Listen to Your Attempt</p>
+                <p className="text-xs text-voca-muted font-body tabular-nums">{recording?.durationSeconds}s recording</p>
+              </div>
             </div>
-            <span className="text-[11px] text-voca-muted font-body tabular-nums">
-              {recording?.durationSeconds}s audio
-            </span>
+
+            <button
+              onClick={() => setIsTranscriptOpen(!isTranscriptOpen)}
+              type="button"
+              className="flex items-center gap-1 px-3 py-1.5 rounded-full bg-voca-subtle hover:bg-voca-surface-high text-xs font-display font-semibold text-voca-ink transition-colors cursor-pointer"
+            >
+              <span>{isTranscriptOpen ? 'Hide words' : 'Show words'}</span>
+              {isTranscriptOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            </button>
           </div>
 
-          <p className="text-sm text-voca-ink leading-relaxed font-body font-normal">
-            {renderHighlightedTranscript()}
-          </p>
+          {/* Collapsible Transcript Content */}
+          {isTranscriptOpen && (
+            <div className="mt-4 pt-4 border-t border-voca-surface-low animate-in fade-in duration-150">
+              <p className="text-sm text-voca-ink leading-relaxed font-body">
+                {renderHighlightedTranscript()}
+              </p>
+            </div>
+          )}
 
           {audioUrl && (
             <audio
@@ -336,47 +315,47 @@ export default function AnalysisResultsView() {
           )}
         </div>
 
-        {/* Strengths & Priority Improvements */}
+        {/* Strengths & Priority Technique */}
         {feedback && (
-          <div className="flex flex-col gap-3 mb-5">
+          <div className="space-y-3 mb-5">
             {/* Strengths */}
-            <div className="rounded-xl bg-emerald-50/60 border border-voca-success/20 p-4">
+            <div className="rounded-2xl bg-voca-surface p-5 border border-voca-border shadow-xs">
               <div className="flex items-center gap-2 text-voca-success mb-2">
                 <CheckCircle2 className="w-4 h-4" />
                 <span className="font-display font-bold text-xs uppercase tracking-wider">
-                  Observed Strengths
+                  What Resonated
                 </span>
               </div>
               <div className="space-y-2">
-                {feedback.strengths.map((s, i) => (
+                {feedback.strengths.slice(0, 2).map((s, i) => (
                   <div key={i} className="text-xs">
-                    <p className="font-bold text-voca-ink">{s.title}</p>
-                    <p className="text-voca-muted">{s.observation}</p>
+                    <p className="font-bold text-voca-ink font-display text-sm">{s.title}</p>
+                    <p className="text-voca-muted font-body mt-0.5">{s.observation}</p>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Improvement Area */}
-            <div className="rounded-xl bg-orange-50/60 border border-voca-tangerine/30 p-4">
-              <div className="flex items-center gap-2 text-voca-primary mb-2">
-                <TrendingUp className="w-4 h-4" />
-                <span className="font-display font-bold text-xs uppercase tracking-wider">
-                  Priority Focus Area
-                </span>
+            {feedback.improvements[0] && (
+              <div className="rounded-2xl bg-voca-surface p-5 border border-voca-border shadow-xs">
+                <div className="flex items-center gap-2 text-voca-primary mb-2">
+                  <TrendingUp className="w-4 h-4" />
+                  <span className="font-display font-bold text-xs uppercase tracking-wider">
+                    One Micro-Adjustment
+                  </span>
+                </div>
+                <div className="text-xs font-body space-y-2">
+                  <p className="font-display font-bold text-sm text-voca-ink">
+                    {feedback.improvements[0].area}
+                  </p>
+                  <p className="text-voca-muted">{feedback.improvements[0].observation}</p>
+                  <p className="text-voca-primary font-semibold bg-voca-surface-low p-3 rounded-xl border border-voca-border">
+                    Technique: {feedback.improvements[0].recommendation}
+                  </p>
+                </div>
               </div>
-              <div className="space-y-2">
-                {feedback.improvements.map((imp, i) => (
-                  <div key={i} className="text-xs">
-                    <p className="font-bold text-voca-ink">{imp.area}</p>
-                    <p className="text-voca-muted mb-1">{imp.observation}</p>
-                    <p className="text-voca-primary font-semibold bg-voca-surface p-2 rounded-lg border border-voca-tangerine/20">
-                      Technique: {imp.recommendation}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
+            )}
           </div>
         )}
 
