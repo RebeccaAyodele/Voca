@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { Mic, LayoutDashboard, Compass, LineChart, Cpu } from 'lucide-react'
+import { Mic, LayoutDashboard, Compass, LineChart, Cpu, Flame } from 'lucide-react'
 import HybridDiagnosticsDrawer from '@/components/diagnostics/HybridDiagnosticsDrawer'
 
 export default function AppLayout() {
@@ -9,6 +9,7 @@ export default function AppLayout() {
 
   const navLinks = [
     { to: '/dashboard', label: 'Home', icon: LayoutDashboard },
+    { to: '/challenges', label: 'Challenges', icon: Flame },
     { to: '/studio', label: 'Studio', icon: Mic },
     { to: '/skills', label: 'Skills', icon: Compass },
     { to: '/progress', label: 'Progress', icon: LineChart }

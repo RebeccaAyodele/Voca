@@ -12,13 +12,16 @@ import {
   RefreshCw,
   Clock,
   Mic,
-  Activity
+  Activity,
+  RotateCcw,
+  Compass
 } from 'lucide-react'
 import { getAudioRecording } from '@/services/persistence/indexed-db'
 import { analyzeAudioSignal, type AudioSignalMetrics } from '@/services/audio/signal-analysis'
 import { calculateTranscriptMetrics, type TranscriptMetrics } from '@/domain/metrics/transcript-metrics'
 import { transcribeAudio } from '@/services/ai/transcription'
 import { generateCoachingFeedback, type CoachingFeedback } from '@/services/ai/coaching'
+import { getChallengeById } from '@/domain/challenges'
 import { useAuthStore } from '@/features/auth/authStore'
 import type { AudioRecording } from '@/services/audio/audio-types'
 
@@ -26,6 +29,8 @@ export default function AnalysisResultsView() {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const recId = searchParams.get('recId')
+  const challengeId = searchParams.get('challengeId')
+  const challenge = challengeId ? getChallengeById(challengeId) : null
   const profile = useAuthStore((state) => state.profile)
 
   const [loading, setLoading] = useState(true)
@@ -87,7 +92,14 @@ export default function AnalysisResultsView() {
         // Stage 4: Generate hybrid AI coaching
         setLoadingStage('Synthesizing evidence-grounded AI coaching...')
         const goals = profile?.goals || ['public-speaking']
-        const coach = await generateCoachingFeedback(text, tMetrics, sig, goals)
+        const challengeContext = challenge
+          ? {
+              title: challenge.title,
+              mission: challenge.mission,
+              skillsAssessed: challenge.skillsAssessed
+            }
+          : undefined
+        const coach = await generateCoachingFeedback(text, tMetrics, sig, goals, challengeContext)
         if (!active) return
         setFeedback(coach)
       } finally {
@@ -184,7 +196,7 @@ export default function AnalysisResultsView() {
             <ArrowLeft className="w-5 h-5 text-voca-ink" />
           </button>
           <span className="font-display font-bold text-xs uppercase tracking-wider text-voca-primary bg-voca-tangerine-subtle/60 px-3 py-1 rounded-full">
-            Baseline Assessment Complete
+            {challenge ? challenge.title : 'Baseline Assessment Complete'}
           </span>
         </header>
 
@@ -380,14 +392,46 @@ export default function AnalysisResultsView() {
             <p className="text-xs text-voca-muted font-body leading-relaxed mb-4">
               {feedback.nextExercise.instruction}
             </p>
-            <button
-              onClick={() => navigate('/studio')}
-              type="button"
-              className="w-full h-12 rounded-full bg-voca-tangerine hover:bg-voca-tangerine-hover text-voca-surface font-display font-bold text-sm flex items-center justify-center gap-2 shadow-sm cursor-pointer transition-all active:scale-[0.98]"
-            >
-              <span>Start 15s Practice Drill</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
+
+            {challenge ? (
+              <div className="flex flex-col gap-2.5">
+                <button
+                  onClick={() => navigate(`/studio?challengeId=${challenge.id}`)}
+                  type="button"
+                  className="w-full h-12 rounded-full bg-voca-tangerine hover:bg-voca-tangerine-hover text-voca-surface font-display font-bold text-sm flex items-center justify-center gap-2 shadow-sm cursor-pointer transition-all active:scale-[0.98]"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  <span>Retry This Challenge</span>
+                </button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => navigate('/challenges')}
+                    type="button"
+                    className="h-11 rounded-full bg-voca-surface hover:bg-voca-surface-high border border-voca-border text-voca-ink font-display font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <span>All Challenges</span>
+                    <ArrowRight className="w-3.5 h-3.5 text-voca-primary" />
+                  </button>
+                  <button
+                    onClick={() => navigate('/skills')}
+                    type="button"
+                    className="h-11 rounded-full bg-voca-surface hover:bg-voca-surface-high border border-voca-border text-voca-ink font-display font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Compass className="w-3.5 h-3.5 text-voca-primary" />
+                    <span>Skill Map</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={() => navigate('/challenges')}
+                type="button"
+                className="w-full h-12 rounded-full bg-voca-tangerine hover:bg-voca-tangerine-hover text-voca-surface font-display font-bold text-sm flex items-center justify-center gap-2 shadow-sm cursor-pointer transition-all active:scale-[0.98]"
+              >
+                <span>Explore Daily Challenges</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            )}
           </div>
         )}
       </div>

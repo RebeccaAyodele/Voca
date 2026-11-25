@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
-import { Mic, ArrowRight, Sparkles, TrendingUp, Compass, Award, Activity } from 'lucide-react'
+import { ArrowRight, Sparkles, TrendingUp, Award, Flame, Compass } from 'lucide-react'
 import { useAuthStore } from '@/features/auth/authStore'
+import { TODAY_DAILY_CHALLENGE } from '@/domain/challenges'
 
 export default function DashboardView() {
   const navigate = useNavigate()
@@ -27,43 +28,58 @@ export default function DashboardView() {
             Your Speaking Practice
           </h1>
           <p className="text-sm text-voca-muted font-body mt-1">
-            Consistent 15-second deliberate repetitions build lasting poise and resonance.
+            Deliberate speaking exercises and daily challenges build lasting poise and resonance.
           </p>
         </div>
 
         <button
-          onClick={() => navigate('/studio')}
+          onClick={() => navigate('/challenges')}
           type="button"
           className="self-start sm:self-auto h-12 px-6 rounded-full bg-voca-tangerine hover:bg-voca-tangerine-hover text-voca-surface font-display font-bold text-sm flex items-center gap-2 shadow-md shadow-voca-tangerine/20 cursor-pointer active:scale-95 transition-all"
         >
-          <Mic className="w-4 h-4" />
-          <span>Start Practising</span>
+          <Flame className="w-4 h-4" />
+          <span>Explore Challenges</span>
         </button>
       </div>
 
-      {/* Main Practice Launcher Hero Card */}
-      <div className="relative rounded-2xl bg-voca-surface border border-voca-border p-6 shadow-xs overflow-hidden flex flex-col sm:flex-row items-center justify-between gap-6">
+      {/* Main Practice Launcher Hero Card: Today's Daily Challenge */}
+      <div className="relative rounded-3xl bg-voca-surface border border-voca-border p-6 sm:p-7 shadow-xs overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2 max-w-lg">
-          <div className="flex items-center gap-2 text-voca-tangerine text-xs font-bold font-display uppercase tracking-wider">
-            <Activity className="w-4 h-4" />
-            <span>Today's Recommended Focus</span>
+          <div className="flex items-center gap-2 text-voca-primary text-xs font-bold font-display uppercase tracking-wider">
+            <span className="w-2 h-2 rounded-full bg-voca-tangerine animate-ping"></span>
+            <span>Today's Daily Challenge</span>
+            <span className="text-voca-muted font-normal">• 5–10 min</span>
           </div>
-          <h2 className="font-display text-2xl font-bold text-voca-ink">
-            Master the 1-Second Thoughtful Pause
+          <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-voca-ink">
+            {TODAY_DAILY_CHALLENGE.title}
           </h2>
           <p className="text-sm text-voca-muted font-body leading-relaxed">
-            Eliminate filler words naturally. Whenever you transition between thoughts, close your lips and take one silent breath before continuing.
+            {TODAY_DAILY_CHALLENGE.mission}
           </p>
+          <div className="flex items-center gap-2 pt-1">
+            <span className="text-xs font-semibold text-voca-muted">
+              Skills: <span className="text-voca-ink">{TODAY_DAILY_CHALLENGE.skillsAssessed.join(' · ')}</span>
+            </span>
+          </div>
         </div>
 
-        <button
-          onClick={() => navigate('/studio')}
-          type="button"
-          className="w-full sm:w-auto shrink-0 h-12 px-6 rounded-full bg-voca-surface-low hover:bg-voca-surface-high border border-voca-border text-voca-ink font-display font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all"
-        >
-          <span>Launch 15s Drill</span>
-          <ArrowRight className="w-4 h-4 text-voca-primary" />
-        </button>
+        <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto shrink-0">
+          <button
+            onClick={() => navigate(`/studio?challengeId=${TODAY_DAILY_CHALLENGE.id}`)}
+            type="button"
+            className="w-full sm:w-auto h-12 px-6 rounded-full bg-voca-tangerine hover:bg-voca-tangerine-hover text-voca-surface font-display font-bold text-xs flex items-center justify-center gap-2 cursor-pointer transition-all shadow-md active:scale-95"
+          >
+            <span>Start Today's Challenge</span>
+            <ArrowRight className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => navigate('/challenges')}
+            type="button"
+            className="w-full sm:w-auto h-12 px-5 rounded-full bg-voca-surface-low hover:bg-voca-surface-high border border-voca-border text-voca-ink font-display font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer transition-all"
+          >
+            <span>View Library (12)</span>
+          </button>
+        </div>
       </div>
 
       {/* Quick Metrics & Skills Grid */}

@@ -5,6 +5,7 @@ import GoalAssessmentView from '@/features/onboarding/GoalAssessmentView'
 import SpeakingStudioView from '@/features/speaking-studio/SpeakingStudioView'
 import AnalysisResultsView from '@/features/speech-analysis/AnalysisResultsView'
 import DashboardView from '@/features/dashboard/DashboardView'
+import ChallengesView from '@/features/challenges/ChallengesView'
 import SkillMapView from '@/features/skill-map/SkillMapView'
 import ProgressView from '@/features/progress/ProgressView'
 import AppLayout from '@/components/layout/AppLayout'
@@ -28,6 +29,10 @@ export const router = createBrowserRouter([
       {
         path: '/dashboard',
         element: <DashboardView />
+      },
+      {
+        path: '/challenges',
+        element: <ChallengesView />
       },
       {
         path: '/studio',
