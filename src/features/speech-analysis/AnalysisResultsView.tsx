@@ -371,7 +371,7 @@ export default function AnalysisResultsView() {
                     <p className="font-bold text-voca-ink">{imp.area}</p>
                     <p className="text-voca-muted mb-1">{imp.observation}</p>
                     <p className="text-voca-primary font-semibold bg-voca-surface p-2 rounded-lg border border-voca-tangerine/20">
-                      💡 Technique: {imp.recommendation}
+                      Technique: {imp.recommendation}
                     </p>
                   </div>
                 ))}

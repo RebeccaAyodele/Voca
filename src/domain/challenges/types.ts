@@ -14,7 +14,6 @@ export interface ChallengeCategory {
   id: ChallengeCategoryId
   title: string
   tagline: string
-  icon: string
   challengeCount: number
 }
 

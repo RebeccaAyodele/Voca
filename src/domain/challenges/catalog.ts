@@ -5,56 +5,48 @@ export const CHALLENGE_CATEGORIES: ChallengeCategory[] = [
     id: 'spontaneous-speaking',
     title: 'Spontaneous speaking',
     tagline: 'Think quickly. Speak naturally.',
-    icon: '⚡',
     challengeCount: 2
   },
   {
     id: 'thought-organisation',
     title: 'Thought organisation',
     tagline: 'Structure your ideas clearly.',
-    icon: '🧠',
     challengeCount: 2
   },
   {
     id: 'everyday-conversation',
     title: 'Everyday conversation',
     tagline: 'Connect and communicate.',
-    icon: '💬',
     challengeCount: 2
   },
   {
     id: 'storytelling',
     title: 'Storytelling',
     tagline: 'Make your stories engaging.',
-    icon: '📖',
     challengeCount: 1
   },
   {
     id: 'public-speaking',
     title: 'Public speaking',
     tagline: 'Present with confidence.',
-    icon: '🎤',
     challengeCount: 2
   },
   {
     id: 'voice-and-delivery',
     title: 'Voice and delivery',
     tagline: 'Improve how you sound.',
-    icon: '🔊',
     challengeCount: 1
   },
   {
     id: 'professional-communication',
     title: 'Professional communication',
     tagline: 'Communicate effectively at work.',
-    icon: '💼',
     challengeCount: 1
   },
   {
     id: 'confidence-under-pressure',
     title: 'Confidence under pressure',
     tagline: 'Stay composed when speaking.',
-    icon: '✨',
     challengeCount: 1
   }
 ]

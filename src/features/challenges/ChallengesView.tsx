@@ -145,7 +145,6 @@ export default function ChallengesView() {
                   : 'bg-voca-subtle text-voca-muted hover:text-voca-ink hover:bg-voca-surface-high'
               }`}
             >
-              <span>{cat.icon}</span>
               <span>{cat.title}</span>
               <span className="opacity-60 text-[10px]">({cat.challengeCount})</span>
             </button>
@@ -162,7 +161,7 @@ export default function ChallengesView() {
                 className="p-4 rounded-2xl bg-voca-surface border border-voca-border hover:border-voca-tangerine hover:shadow-sm transition-all cursor-pointer group flex flex-col justify-between"
               >
                 <div>
-                  <div className="text-2xl mb-2">{cat.icon}</div>
+                  <div className="w-2 h-2 rounded-full bg-voca-tangerine mb-3"></div>
                   <h3 className="font-display font-bold text-sm text-voca-ink group-hover:text-voca-primary transition-colors">
                     {cat.title}
                   </h3>

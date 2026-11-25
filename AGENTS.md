@@ -16,7 +16,7 @@ You are implementing Voca, a polished AI-powered speaking and communication-deve
 - Name: Voca
 - Primary colour: Tangerine `#F47B45`
 - Brand direction: Resonant V / Soundform; distinctive abstract non-animal mark.
-- Personality: confident, warm, intelligent, encouraging, modern; avoid childish gamification and generic AI aesthetics.
+- Personality: confident, warm, intelligent, encouraging, modern; avoid childish gamification, generic AI aesthetics, and never use emojis anywhere in the UI or code.
 - Google Stitch is the source of truth for approved screen designs. Follow supplied designs and design tokens; do not invent a different visual system.
 
 ## Engineering rules
