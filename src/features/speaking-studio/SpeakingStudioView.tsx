@@ -13,6 +13,9 @@ import {
   X,
   Check,
   Volume2,
+  VolumeX,
+  ChevronUp,
+  Info,
   Lock,
   Sparkles
 } from 'lucide-react'
@@ -52,6 +55,9 @@ export default function SpeakingStudioView() {
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isPromptExpanded, setIsPromptExpanded] = useState(false)
+  const [hasDetectedVoice, setHasDetectedVoice] = useState(false)
+  const [showTooShortWarning, setShowTooShortWarning] = useState(false)
 
   const recorderRef = useRef<AudioRecorderEngine | null>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
@@ -117,6 +123,8 @@ export default function SpeakingStudioView() {
       setStep('recording')
       setIsPaused(false)
       setSecondsElapsed(0)
+      setHasDetectedVoice(false)
+      setShowTooShortWarning(false)
 
       if (!recorderRef.current) {
         recorderRef.current = new AudioRecorderEngine()
@@ -127,6 +135,9 @@ export default function SpeakingStudioView() {
         const avg = amplitudes.reduce((a, b) => a + b, 0) / amplitudes.length
         const normalized = Math.min(1, Math.max(0, (avg - 8) / 36))
         setCurrentVolume(normalized)
+        if (normalized > 0.08) {
+          setHasDetectedVoice(true)
+        }
       })
 
       setStatus('recording')
@@ -176,6 +187,30 @@ export default function SpeakingStudioView() {
         timerRef.current = null
       }
     }
+  }
+
+  // Ergonomic stop check (Nielsen Heuristic #5: Error Prevention for brief recordings)
+  const handleAttemptStop = () => {
+    if (secondsElapsed < 5) {
+      if (!isPaused) {
+        handleTogglePause()
+      }
+      setShowTooShortWarning(true)
+      return
+    }
+    handleStopRecording()
+  }
+
+  const handleResumeFromTooShort = () => {
+    setShowTooShortWarning(false)
+    if (isPaused) {
+      handleTogglePause()
+    }
+  }
+
+  const handleForceFinish = () => {
+    setShowTooShortWarning(false)
+    handleStopRecording()
   }
 
   // Stop recording and move to review step
@@ -270,7 +305,7 @@ export default function SpeakingStudioView() {
   if (step === 'recording') {
     return (
       <div className="bg-voca-canvas text-voca-ink min-h-screen flex flex-col justify-between overflow-hidden select-none relative">
-        {/* Minimal Top Bar (Subtle exit action + live timer pill) */}
+        {/* Minimal Top Bar (Exit action + live timer pill + prompt info toggle) */}
         <header className="w-full z-50 pt-safe px-6 flex items-center justify-between">
           <div className="h-16 flex items-center justify-between w-full max-w-md mx-auto">
             <button
@@ -298,9 +333,26 @@ export default function SpeakingStudioView() {
               </span>
             </div>
 
-            <div className="min-w-[44px] min-h-[44px]" />
+            {/* Toggle Full Prompt Button */}
+            <button
+              type="button"
+              onClick={() => setIsPromptExpanded(!isPromptExpanded)}
+              aria-label="Toggle full prompt details"
+              className="min-w-[44px] min-h-[44px] -mr-2 rounded-full flex items-center justify-center text-voca-muted hover:text-voca-ink hover:bg-voca-surface-low transition-colors cursor-pointer"
+              title={isPromptExpanded ? 'Hide prompt details' : 'View full prompt details'}
+            >
+              {isPromptExpanded ? <ChevronUp className="w-5 h-5" /> : <Info className="w-5 h-5 text-voca-primary" />}
+            </button>
           </div>
         </header>
+
+        {/* Microphone Silence Warning (Nielsen Heuristic #1) */}
+        {secondsElapsed >= 3 && !hasDetectedVoice && !isPaused && (
+          <div className="absolute top-16 left-0 right-0 mx-auto w-fit z-40 px-3.5 py-1.5 rounded-full bg-voca-surface border border-voca-warning/40 text-voca-ink text-xs font-body flex items-center gap-1.5 shadow-md animate-in fade-in">
+            <VolumeX className="w-3.5 h-3.5 text-voca-warning shrink-0" />
+            <span>No audio detected yet — check if your mic is muted</span>
+          </div>
+        )}
 
         {/* Central Focal Point: Breathing Voca Acoustic Soundform from Stitch */}
         <main className="flex-1 flex flex-col items-center justify-center relative w-full px-6 my-auto">
@@ -310,63 +362,120 @@ export default function SpeakingStudioView() {
             volume={currentVolume}
           />
 
-          {/* Quiet prompt reminder */}
-          <div className="relative z-10 mt-2 max-w-sm text-center px-4 py-2 rounded-full bg-voca-surface/60 backdrop-blur-xs border border-voca-border/50">
-            <p className="font-body text-xs text-voca-muted line-clamp-1 italic">
+          {/* Legible Prompt Reminder (HCI: Recognition Over Recall) */}
+          <div
+            onClick={() => setIsPromptExpanded(!isPromptExpanded)}
+            className="relative z-10 mt-3 max-w-sm text-center px-4 py-2.5 rounded-2xl bg-voca-surface/90 backdrop-blur-md border border-voca-border shadow-xs cursor-pointer hover:bg-voca-surface transition-all duration-200"
+          >
+            <p className="font-display font-semibold text-xs sm:text-sm text-voca-ink leading-relaxed">
               “{activePrompt}”
             </p>
+
+            {isPromptExpanded && challenge && (
+              <div className="mt-2.5 pt-2 border-t border-voca-surface-low text-left space-y-1.5 animate-in fade-in">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-voca-primary font-display block">
+                  Focus Anchors:
+                </span>
+                <p className="text-[11px] text-voca-muted font-body leading-relaxed">
+                  {challenge.mission}
+                </p>
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {challenge.skillsAssessed.map((skill, idx) => (
+                    <span
+                      key={idx}
+                      className="text-[10px] font-medium bg-voca-surface-low px-2 py-0.5 rounded-md text-voca-muted"
+                    >
+                      • {skill}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </main>
 
-        {/* Serene Minimal Bottom Controls (Restart, Record/Pause, Review) */}
+        {/* Serene Bottom Controls (Fitts's Law Ergonomic Primary Action) */}
         <footer className="w-full pb-safe px-6 mb-8 flex flex-col items-center justify-center z-50">
-          <div className="w-full max-w-sm flex items-center justify-between px-6">
-            {/* Restart Session */}
+          <div className="w-full max-w-sm flex items-center justify-between gap-3 px-2">
+            {/* Secondary Action: Restart */}
             <button
               onClick={handleRestartSession}
               type="button"
               aria-label="Restart Session"
-              className="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[56px] rounded-full hover:bg-voca-surface-low active:scale-95 transition-all text-voca-muted hover:text-voca-ink group cursor-pointer"
+              className="w-12 h-12 rounded-full bg-voca-surface hover:bg-voca-surface-high border border-voca-border shadow-xs flex items-center justify-center text-voca-muted hover:text-voca-ink active:scale-95 transition-all cursor-pointer shrink-0"
+              title="Restart session"
             >
-              <div className="w-12 h-12 rounded-full bg-voca-surface flex items-center justify-center border border-voca-border shadow-xs group-hover:bg-voca-surface-high transition-colors">
-                <RotateCcw className="w-5 h-5 text-voca-ink" />
-              </div>
-              <span className="font-body text-[11px] font-medium tracking-wide text-voca-muted">
-                Restart
-              </span>
+              <RotateCcw className="w-5 h-5 text-voca-ink" />
             </button>
 
-            {/* Main Toggle (Pause / Resume) */}
-            <div className="relative flex items-center justify-center">
-              {!isPaused && (
-                <div className="absolute w-20 h-20 rounded-full bg-voca-tangerine/20 animate-ping pointer-events-none" />
-              )}
-              <button
-                onClick={handleTogglePause}
-                type="button"
-                aria-label={isPaused ? 'Resume recording' : 'Pause recording'}
-                className="relative z-10 w-16 h-16 rounded-full bg-voca-tangerine hover:bg-voca-tangerine-hover text-voca-surface flex items-center justify-center shadow-lg active:scale-90 transition-all cursor-pointer"
-              >
-                {isPaused ? <Play className="w-6 h-6 fill-current ml-0.5" /> : <Pause className="w-6 h-6 fill-current" />}
-              </button>
-            </div>
-
-            {/* Review / Finish Session */}
+            {/* Primary Action: Done Speaking (Large Fitts's Target) */}
             <button
-              onClick={handleStopRecording}
+              onClick={handleAttemptStop}
               type="button"
-              aria-label="Review Session"
-              className="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[56px] rounded-full hover:bg-voca-surface-low active:scale-95 transition-all text-voca-muted hover:text-voca-ink group cursor-pointer"
+              className="flex-1 h-14 rounded-full bg-voca-tangerine hover:bg-voca-tangerine-hover text-voca-surface font-display font-bold text-sm shadow-lg shadow-voca-tangerine/25 flex items-center justify-center gap-2 active:scale-98 transition-all cursor-pointer"
             >
-              <div className="w-12 h-12 rounded-full bg-voca-tangerine-subtle text-voca-primary flex items-center justify-center border border-voca-tangerine/20 shadow-xs group-hover:bg-voca-tangerine/20 transition-colors">
-                <Check className="w-5 h-5 text-voca-primary" />
-              </div>
-              <span className="font-body text-[11px] font-medium tracking-wide text-voca-muted">
-                Review
-              </span>
+              <Check className="w-5 h-5 stroke-[2.5]" />
+              <span>Done Speaking</span>
+            </button>
+
+            {/* Secondary Action: Pause / Resume */}
+            <button
+              onClick={handleTogglePause}
+              type="button"
+              aria-label={isPaused ? 'Resume recording' : 'Pause recording'}
+              className="w-12 h-12 rounded-full bg-voca-surface hover:bg-voca-surface-high border border-voca-border shadow-xs flex items-center justify-center text-voca-ink active:scale-95 transition-all cursor-pointer shrink-0"
+              title={isPaused ? 'Resume recording' : 'Pause recording'}
+            >
+              {isPaused ? (
+                <Play className="w-5 h-5 fill-current ml-0.5 text-voca-primary" />
+              ) : (
+                <Pause className="w-5 h-5 fill-current text-voca-muted" />
+              )}
             </button>
           </div>
         </footer>
+
+        {/* Accidental Brief Recording Guard Modal (Nielsen Heuristic #5) */}
+        {showTooShortWarning && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs animate-in fade-in">
+            <div className="w-full max-w-sm rounded-3xl bg-voca-canvas border border-voca-border p-6 shadow-2xl text-center space-y-4">
+              <div className="w-12 h-12 rounded-full bg-voca-tangerine-subtle text-voca-primary flex items-center justify-center mx-auto border border-voca-tangerine/30">
+                <Info className="w-6 h-6 text-voca-tangerine" />
+              </div>
+              <div>
+                <h3 className="font-display font-bold text-lg text-voca-ink">
+                  Only {secondsElapsed} Seconds Spoken
+                </h3>
+                <p className="font-body text-xs text-voca-muted mt-1 leading-relaxed">
+                  Speaking for at least 15 seconds allows Voca to accurately measure your talking speed, natural pauses, and thought progression.
+                </p>
+              </div>
+              <div className="flex flex-col gap-2 pt-1">
+                <button
+                  type="button"
+                  onClick={handleResumeFromTooShort}
+                  className="w-full h-12 rounded-full bg-voca-tangerine hover:bg-voca-tangerine-hover text-voca-surface font-display font-bold text-sm shadow-xs cursor-pointer transition-all active:scale-95"
+                >
+                  Keep Speaking
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRestartSession}
+                  className="w-full h-11 rounded-full bg-voca-surface hover:bg-voca-surface-high border border-voca-border text-voca-ink font-display font-bold text-xs cursor-pointer transition-colors"
+                >
+                  Start Over
+                </button>
+                <button
+                  type="button"
+                  onClick={handleForceFinish}
+                  className="text-[11px] font-body text-voca-muted hover:text-voca-ink hover:underline pt-1 cursor-pointer"
+                >
+                  Finish anyway with {secondsElapsed}s
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     )
   }

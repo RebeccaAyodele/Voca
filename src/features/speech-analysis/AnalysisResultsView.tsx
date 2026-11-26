@@ -157,6 +157,12 @@ export default function AnalysisResultsView() {
     setIsPlaying(true)
   }
 
+  const formatMinSec = (sec: number) => {
+    const m = Math.floor(sec / 60)
+    const s = Math.floor(sec % 60)
+    return `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`
+  }
+
   // Interactive Transcript with Word-Level Seeking & Filler Highlighting
   const renderInteractiveTranscript = () => {
     if (!transcript) return null
@@ -379,6 +385,35 @@ export default function AnalysisResultsView() {
               <span>{isTranscriptOpen ? 'Hide words' : 'Show words'}</span>
               {isTranscriptOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
             </button>
+          </div>
+
+          {/* Interactive Audio Progress Scrubber (Direct Manipulation Affordance) */}
+          <div className="mt-3 pt-3 border-t border-voca-surface-low space-y-1.5">
+            <div
+              role="slider"
+              aria-label="Audio progress slider"
+              aria-valuenow={Math.round(currentTime)}
+              tabIndex={0}
+              className="relative w-full h-2 rounded-full bg-voca-surface-high cursor-pointer overflow-hidden group"
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect()
+                const clickX = e.clientX - rect.left
+                const pct = Math.max(0, Math.min(1, clickX / rect.width))
+                const total = signalMetrics?.durationSeconds || recording?.durationSeconds || 1
+                seekAndPlay(pct * total)
+              }}
+            >
+              <div
+                className="h-full bg-voca-tangerine rounded-full transition-all duration-75"
+                style={{
+                  width: `${Math.min(100, (currentTime / Math.max(1, signalMetrics?.durationSeconds || recording?.durationSeconds || 1)) * 100)}%`
+                }}
+              />
+            </div>
+            <div className="flex items-center justify-between text-[11px] font-body text-voca-muted tabular-nums">
+              <span>{formatMinSec(currentTime)}</span>
+              <span>{formatMinSec(signalMetrics?.durationSeconds || recording?.durationSeconds || 0)}</span>
+            </div>
           </div>
 
           {/* Collapsible Transcript Content with Interactive Word Seeking */}
