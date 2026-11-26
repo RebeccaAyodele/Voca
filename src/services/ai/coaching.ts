@@ -68,8 +68,10 @@ export async function generateCoachingFeedback(
     try {
       const ai = getAI(firebaseApp, { backend: new GoogleAIBackend() })
       const model = getGenerativeModel(ai, {
-        model: 'gemini-1.5-flash',
-        mode: InferenceMode.PREFER_ON_DEVICE
+        mode: InferenceMode.PREFER_ON_DEVICE,
+        inCloudParams: {
+          model: 'gemini-1.5-flash'
+        }
       })
 
       const result = await model.generateContent(systemPrompt)

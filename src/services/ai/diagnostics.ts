@@ -55,8 +55,10 @@ export async function runDiagnosticsInference(
     try {
       const ai = getAI(firebaseApp, { backend: new GoogleAIBackend() })
       const model = getGenerativeModel(ai, {
-        model: 'gemini-1.5-flash',
-        mode: mode === 'PREFER_ON_DEVICE' ? InferenceMode.PREFER_ON_DEVICE : InferenceMode.PREFER_IN_CLOUD
+        mode: mode === 'PREFER_ON_DEVICE' ? InferenceMode.PREFER_ON_DEVICE : InferenceMode.PREFER_IN_CLOUD,
+        inCloudParams: {
+          model: 'gemini-1.5-flash'
+        }
       })
 
       const result = await model.generateContent(prompt)

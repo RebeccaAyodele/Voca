@@ -1,0 +1,132 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="80 80 340 340" width="100%" height="100%">
+  <defs>
+    <!-- Vibrant Tangerine, Golden-Orange, and Coral Gradients -->
+    <linearGradient id="slice-grad-1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFB385" />
+      <stop offset="50%" stop-color="#F7864F" />
+      <stop offset="100%" stop-color="#E2581E" />
+    </linearGradient>
+
+    <linearGradient id="slice-grad-2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFBE94" />
+      <stop offset="45%" stop-color="#F99462" />
+      <stop offset="100%" stop-color="#EA672D" />
+    </linearGradient>
+
+    <linearGradient id="slice-grad-3" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFC9A3" />
+      <stop offset="50%" stop-color="#FA9F72" />
+      <stop offset="100%" stop-color="#F1743B" />
+    </linearGradient>
+
+    <linearGradient id="slice-grad-4" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFD4B5" />
+      <stop offset="50%" stop-color="#FBAC84" />
+      <stop offset="100%" stop-color="#F5834D" />
+    </linearGradient>
+
+    <linearGradient id="slice-grad-5" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFDEBE" />
+      <stop offset="50%" stop-color="#FFBA96" />
+      <stop offset="100%" stop-color="#FA9665" />
+    </linearGradient>
+
+    <linearGradient id="slice-grad-6" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFE7D0" />
+      <stop offset="60%" stop-color="#FFCAA8" />
+      <stop offset="100%" stop-color="#FCA677" />
+    </linearGradient>
+
+    <!-- Warm luminous boundary accent -->
+    <linearGradient id="warm-seam-grad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#E05218" stop-opacity="0.35" />
+      <stop offset="50%" stop-color="#D6480F" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#E05218" stop-opacity="0.3" />
+    </linearGradient>
+
+    <!-- Circular clip path for the sound sphere -->
+    <clipPath id="circle-clip">
+      <circle cx="250" cy="250" r="170" />
+    </clipPath>
+  </defs>
+
+  <!-- PURE ACOUSTIC SOUND SPHERE (Transparent background, no surrounding rectangle) -->
+  <g>
+    <!-- Sphere base filled with warm saturated tangerine -->
+    <circle cx="250" cy="250" r="170" fill="url(#slice-grad-1)" />
+
+    <!-- Clipped nested 3D wave slices echoing the soundform reference -->
+    <g clip-path="url(#circle-clip)">
+      
+      <!-- Slice 1 (Far Left wave contour) -->
+      <path d="M 80 80 
+               L 175 80 
+               C 160 145, 138 200, 152 270 
+               C 168 335, 195 385, 195 425 
+               L 80 425 Z" 
+            fill="url(#slice-grad-1)" />
+
+      <!-- Slice 2 (Second undulating crest) -->
+      <path d="M 165 80 
+               L 245 80 
+               C 225 155, 192 205, 210 275 
+               C 228 335, 260 380, 262 425 
+               L 182 425 
+               C 182 385, 155 335, 140 270 
+               C 126 200, 150 145, 165 80 Z" 
+            fill="url(#slice-grad-2)" />
+      <path d="M 165 80 C 150 145, 126 200, 140 270 C 155 335, 182 385, 182 425" 
+            fill="none" stroke="url(#warm-seam-grad)" stroke-width="2.5" />
+
+      <!-- Slice 3 (Third undulating crest - Middle Wave) -->
+      <path d="M 235 80 
+               L 318 80 
+               C 298 150, 252 200, 272 280 
+               C 290 340, 328 385, 328 425 
+               L 250 425 
+               C 248 380, 216 335, 198 275 
+               C 180 205, 215 155, 235 80 Z" 
+            fill="url(#slice-grad-3)" />
+      <path d="M 235 80 C 215 155, 180 205, 198 275 C 216 335, 248 380, 250 425" 
+            fill="none" stroke="url(#warm-seam-grad)" stroke-width="2.5" />
+
+      <!-- Slice 4 (Fourth undulating crest) -->
+      <path d="M 308 80 
+               L 392 80 
+               C 372 155, 325 210, 342 270 
+               C 358 325, 395 375, 398 425 
+               L 318 425 
+               C 318 385, 280 340, 262 280 
+               C 242 200, 288 150, 308 80 Z" 
+            fill="url(#slice-grad-4)" />
+      <path d="M 308 80 C 288 150, 242 200, 262 280 C 280 340, 318 385, 318 425" 
+            fill="none" stroke="url(#warm-seam-grad)" stroke-width="2.5" />
+
+      <!-- Slice 5 (Fifth curved acoustic crest) -->
+      <path d="M 382 80 
+               L 430 80 
+               L 430 220
+               C 405 250, 375 285, 382 325
+               C 390 365, 410 395, 415 425
+               L 388 425 
+               C 385 375, 348 325, 332 270 
+               C 315 210, 362 155, 382 80 Z" 
+            fill="url(#slice-grad-5)" />
+      <path d="M 382 80 C 362 155, 315 210, 332 270 C 348 325, 385 375, 388 425" 
+            fill="none" stroke="url(#warm-seam-grad)" stroke-width="2.5" />
+
+      <!-- Slice 6 (Far Right highlight shelf) -->
+      <path d="M 418 80 
+               L 430 80 
+               L 430 425 
+               L 405 425
+               C 400 395, 380 365, 372 325
+               C 365 285, 395 250, 420 220 
+               C 420 160, 418 110, 418 80 Z" 
+            fill="url(#slice-grad-6)" />
+
+      <!-- Subtle inner ambient edge rim -->
+      <circle cx="250" cy="250" r="169" fill="none" stroke="#FFD8BE" stroke-width="2.5" opacity="0.6" />
+    </g>
+  </g>
+</svg>

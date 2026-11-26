@@ -17,9 +17,9 @@ export default function WelcomeView() {
 
           {/* Primary Acoustic Sphere Icon */}
           <img
-            src="/icon.png"
+            src="/icon.svg"
             alt="Voca Soundform"
-            className="relative w-52 h-52 sm:w-60 sm:h-60 object-contain drop-shadow-2xl transition-transform duration-700 hover:scale-105 cursor-pointer"
+            className="relative w-52 h-52 sm:w-60 sm:h-60 object-contain drop-shadow-2xl transition-transform duration-700 hover:scale-105 cursor-pointer rounded-full"
           />
 
           {/* Orbiting Micro Badges */}
