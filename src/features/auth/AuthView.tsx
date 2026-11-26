@@ -58,9 +58,10 @@ export default function AuthView() {
     clearError()
     try {
       await signInAsGuest()
-      navigate('/onboarding/goals')
     } catch {
-      // Error handled by store
+      // Fallback seamlessly to guest demo flow
+    } finally {
+      navigate('/onboarding/goals')
     }
   }
 

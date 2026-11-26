@@ -27,7 +27,7 @@ export function initAppCheck(): AppCheck | null {
     if (recaptchaSiteKey) {
       appCheckInstance = initializeAppCheck(firebaseApp, {
         provider: new ReCaptchaV3Provider(recaptchaSiteKey),
-        isTokenAutoRefreshEnabled: true
+        isTokenAutoRefreshEnabled: false
       })
     }
   } catch (error) {

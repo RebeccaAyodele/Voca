@@ -31,10 +31,15 @@ export async function saveUserProfile(profile: UserProfile): Promise<void> {
     try {
       const db: Firestore = getFirestore(firebaseApp)
       const userDocRef = doc(db, 'users', profile.uid)
-      await setDoc(userDocRef, profile, { merge: true })
+      await Promise.race([
+        setDoc(userDocRef, profile, { merge: true }),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Firestore save timed out')), 2500)
+        )
+      ])
       return
     } catch (err) {
-      console.warn('Firestore saveUserProfile failed or permission denied, saving locally:', err)
+      console.warn('Firestore saveUserProfile failed or timed out, saving locally:', err)
     }
   }
 
@@ -46,13 +51,18 @@ export async function getUserProfile(uid: string): Promise<UserProfile | null> {
     try {
       const db: Firestore = getFirestore(firebaseApp)
       const userDocRef = doc(db, 'users', uid)
-      const snapshot = await getDoc(userDocRef)
+      const snapshot = await Promise.race([
+        getDoc(userDocRef),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Firestore read timed out')), 2500)
+        )
+      ])
       if (snapshot.exists()) {
         return snapshot.data() as UserProfile
       }
       return null
     } catch (err) {
-      console.warn('Firestore getUserProfile failed, reading from local fallback:', err)
+      console.warn('Firestore getUserProfile failed or timed out, reading from local fallback:', err)
     }
   }
 

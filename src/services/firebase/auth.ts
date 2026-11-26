@@ -90,14 +90,20 @@ export async function signInAsGuest(): Promise<AuthUser> {
   if (isFirebaseConfigured) {
     try {
       const auth = getAuth(firebaseApp)
-      const cred = await fbSignInAnonymously(auth)
+      // Guard against App Check API disablement or hanging network
+      const cred = await Promise.race([
+        fbSignInAnonymously(auth),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error('Firebase anonymous auth timed out')), 2500)
+        )
+      ])
       return {
         uid: cred.user.uid,
         email: null,
         isAnonymous: true
       }
     } catch (fbErr) {
-      console.warn('Firebase Anonymous Auth provider not enabled in console or failed, falling back to local demo session:', fbErr)
+      console.warn('Firebase Anonymous Auth or App Check not ready, using local demo session:', fbErr)
     }
   }
 
