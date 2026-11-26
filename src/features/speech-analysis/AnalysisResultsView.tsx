@@ -15,7 +15,7 @@ import {
   ChevronUp
 } from 'lucide-react'
 import HybridDiagnosticsDrawer from '@/components/diagnostics/HybridDiagnosticsDrawer'
-import { getAudioRecording } from '@/services/persistence/indexed-db'
+import { getAudioRecording, saveSessionResult } from '@/services/persistence/indexed-db'
 import { analyzeAudioSignal, type AudioSignalMetrics } from '@/services/audio/signal-analysis'
 import { calculateTranscriptMetrics, type TranscriptMetrics } from '@/domain/metrics/transcript-metrics'
 import { transcribeAudio } from '@/services/ai/transcription'
@@ -105,6 +105,24 @@ export default function AnalysisResultsView() {
         const coach = await generateCoachingFeedback(text, tMetrics, sig, goals, challengeContext)
         if (!active) return
         setFeedback(coach)
+
+        // Save session result to drive adaptive habit-learning recommendation engine
+        await saveSessionResult({
+          id: 'session-' + Date.now().toString(36),
+          recId: rec.id,
+          challengeId: challenge?.id,
+          challengeTitle: challenge?.title || 'Vocal Baseline',
+          createdAt: new Date().toISOString(),
+          transcript: text,
+          wordsPerMinute: tMetrics.wordsPerMinute,
+          wordCount: tMetrics.wordCount,
+          fillerCount: tMetrics.fillerWordCount,
+          fillerPercentage: tMetrics.fillerPercentage,
+          pauseCount: sig.pauseCount,
+          overallSummary: coach.overallSummary,
+          priorityArea: coach.improvements[0]?.area || 'Pacing',
+          priorityRecommendation: coach.improvements[0]?.recommendation || ''
+        })
       } finally {
         if (active) setLoading(false)
       }
