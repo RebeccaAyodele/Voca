@@ -1,4 +1,4 @@
-import { X, ArrowRight, Clock, Target, CheckCircle2 } from 'lucide-react'
+import { X, ArrowRight, Clock, Target, CheckCircle2, Sparkles } from 'lucide-react'
 import type { Challenge } from '@/domain/challenges/types'
 
 interface ChallengePreviewModalProps {
@@ -61,12 +61,21 @@ export default function ChallengePreviewModal({
 
         {/* Speaking Prompt Card */}
         <div className="rounded-2xl bg-voca-tangerine-subtle/30 p-4 border border-voca-tangerine/20 mb-4">
-          <span className="text-[10px] font-bold text-voca-primary font-display uppercase tracking-wider block mb-1">
-            Your Speaking Prompt
-          </span>
-          <p className="font-display text-base font-bold text-voca-ink leading-snug">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-xs font-bold text-voca-primary font-display uppercase tracking-wider block">
+              Sample Speaking Prompt
+            </span>
+            <span className="text-xs text-voca-primary font-semibold flex items-center gap-1">
+              <Sparkles className="w-3 h-3 text-voca-tangerine" />
+              Dynamic AI
+            </span>
+          </div>
+          <p className="font-display text-sm font-semibold text-voca-ink leading-snug">
             “{challenge.speakingPrompt}”
           </p>
+          <span className="text-xs text-voca-muted font-body mt-2 block">
+            Voca generates fresh, realistic prompts tailored to your speaking goals on every take.
+          </span>
         </div>
 
         {/* What to Focus On */}

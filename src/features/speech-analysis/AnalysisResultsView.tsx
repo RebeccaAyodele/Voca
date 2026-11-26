@@ -29,6 +29,7 @@ export default function AnalysisResultsView() {
   const [searchParams] = useSearchParams()
   const recId = searchParams.get('recId')
   const challengeId = searchParams.get('challengeId')
+  const promptParam = searchParams.get('prompt') || undefined
   const challenge = challengeId ? getChallengeById(challengeId) : null
   const profile = useAuthStore((state) => state.profile)
 
@@ -99,7 +100,15 @@ export default function AnalysisResultsView() {
               id: challenge.id,
               title: challenge.title,
               mission: challenge.mission,
-              skillsAssessed: challenge.skillsAssessed
+              skillsAssessed: challenge.skillsAssessed,
+              prompt: promptParam
+            }
+          : promptParam
+          ? {
+              title: 'Speaking Exercise',
+              mission: 'Speak clearly and authentically',
+              skillsAssessed: ['Pacing', 'Clarity', 'Confidence'],
+              prompt: promptParam
             }
           : undefined
         const coach = await generateCoachingFeedback(text, tMetrics, sig, goals, challengeContext)
@@ -255,6 +264,18 @@ export default function AnalysisResultsView() {
             Deterministic measurements from your voice sample paired with private AI feedback.
           </p>
         </div>
+
+        {/* Dynamic Scenario Prompt Recalled */}
+        {promptParam && (
+          <div className="mb-5 rounded-2xl bg-voca-surface p-4 border border-voca-border shadow-xs">
+            <span className="text-xs font-bold uppercase tracking-wider text-voca-primary font-display block mb-1">
+              Speaking Prompt Answered
+            </span>
+            <p className="font-display text-base font-semibold text-voca-ink leading-relaxed">
+              “{promptParam}”
+            </p>
+          </div>
+        )}
 
         {/* AI Coach Executive Summary Card */}
         {feedback && (

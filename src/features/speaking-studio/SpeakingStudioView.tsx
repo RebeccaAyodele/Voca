@@ -7,7 +7,6 @@ import {
   Play,
   Pause,
   AlertCircle,
-  Shuffle,
   Target,
   CheckCircle2,
   X,
@@ -22,6 +21,8 @@ import {
 import { AudioRecorderEngine } from '@/services/audio/recorder'
 import { saveAudioRecording } from '@/services/persistence/indexed-db'
 import { getChallengeById } from '@/domain/challenges'
+import { useAuthStore } from '@/features/auth/authStore'
+import { generateDynamicScenario, type GeneratedScenario } from '@/services/ai/scenario-generator'
 import { SoundformBlob } from './SoundformBlob'
 import type { AudioRecording, RecorderStatus } from '@/services/audio/audio-types'
 
@@ -44,7 +45,7 @@ export default function SpeakingStudioView() {
   const targetDurationSeconds = challenge ? challenge.speakingDurationSeconds : 15
   const initialPrepSeconds = challenge ? challenge.prepDurationSeconds : 15
 
-  const [promptIndex, setPromptIndex] = useState(0)
+  const [promptIndex] = useState(0)
   const [step, setStep] = useState<StudioStep>('prompt')
   const [prepSecondsLeft, setPrepSecondsLeft] = useState(initialPrepSeconds)
   const [status, setStatus] = useState<RecorderStatus>('idle')
@@ -64,7 +65,62 @@ export default function SpeakingStudioView() {
   const prepTimerRef = useRef<NodeJS.Timeout | null>(null)
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null)
 
-  const activePrompt = challenge ? challenge.speakingPrompt : BASELINE_PROMPT_OPTIONS[promptIndex]
+  const profile = useAuthStore((state) => state.profile)
+  const [scenario, setScenario] = useState<GeneratedScenario | null>(null)
+  const [isGeneratingScenario, setIsGeneratingScenario] = useState(false)
+  const [usedPrompts, setUsedPrompts] = useState<string[]>([])
+
+  const activePrompt = scenario
+    ? scenario.prompt
+    : challenge
+    ? challenge.speakingPrompt
+    : BASELINE_PROMPT_OPTIONS[promptIndex]
+
+  // Automatically load a dynamic AI scenario on mount / when challengeId changes
+  useEffect(() => {
+    let isMounted = true
+
+    async function loadInitialScenario() {
+      setIsGeneratingScenario(true)
+      try {
+        const id = challengeId || 'baseline-speaking'
+        const goals = profile?.goals || []
+        const result = await generateDynamicScenario(id, goals, [])
+        if (isMounted) {
+          setScenario(result)
+          setUsedPrompts([result.prompt])
+        }
+      } catch (err) {
+        console.warn('Could not load AI scenario:', err)
+      } finally {
+        if (isMounted) {
+          setIsGeneratingScenario(false)
+        }
+      }
+    }
+
+    loadInitialScenario()
+
+    return () => {
+      isMounted = false
+    }
+  }, [challengeId, profile?.goals])
+
+  const handleGenerateNewScenario = async () => {
+    if (isGeneratingScenario) return
+    setIsGeneratingScenario(true)
+    try {
+      const id = challengeId || 'baseline-speaking'
+      const goals = profile?.goals || []
+      const result = await generateDynamicScenario(id, goals, usedPrompts)
+      setScenario(result)
+      setUsedPrompts((prev) => [...prev, result.prompt])
+    } catch (err) {
+      console.warn('Error generating AI scenario:', err)
+    } finally {
+      setIsGeneratingScenario(false)
+    }
+  }
 
   useEffect(() => {
     recorderRef.current = new AudioRecorderEngine()
@@ -287,7 +343,8 @@ export default function SpeakingStudioView() {
     if (!recording) return
     const query = new URLSearchParams({
       recId: recording.id,
-      ...(challenge ? { challengeId: challenge.id } : {})
+      ...(challenge ? { challengeId: challenge.id } : {}),
+      ...(activePrompt ? { prompt: activePrompt } : {})
     })
     navigate(`/analysis?${query.toString()}`)
   }
@@ -714,35 +771,65 @@ export default function SpeakingStudioView() {
           </div>
         )}
 
-        {/* 1. Speaking Prompt Card (Presented First!) */}
+        {/* 1. Speaking Prompt Card (Dynamically Generated with Firebase AI) */}
         <div className="relative w-full rounded-2xl bg-voca-surface p-5 border border-voca-border shadow-xs mb-4">
           <div className="flex items-center justify-between pb-3 mb-2 border-b border-voca-surface-low">
             <div className="flex items-center gap-1.5">
               <Volume2 className="w-4 h-4 text-voca-primary" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-voca-primary font-display">
-                Speaking Prompt
+              <span className="text-xs font-bold uppercase tracking-wider text-voca-primary font-display">
+                Speaking Scenario
               </span>
             </div>
             <div className="flex items-center gap-2">
-              {!isChallengeMode && (
-                <button
-                  type="button"
-                  onClick={() => setPromptIndex((prev) => (prev + 1) % BASELINE_PROMPT_OPTIONS.length)}
-                  className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-voca-subtle hover:bg-voca-surface-high text-[10px] font-semibold text-voca-muted hover:text-voca-ink transition-colors cursor-pointer"
-                  title="Shuffle prompt"
-                >
-                  <Shuffle className="w-3 h-3 text-voca-tangerine" />
-                  <span>Shuffle</span>
-                </button>
-              )}
-              <span className="px-2 py-0.5 rounded-full bg-voca-subtle text-[10px] font-semibold text-voca-muted tabular-nums">
+              <button
+                type="button"
+                onClick={handleGenerateNewScenario}
+                disabled={isGeneratingScenario}
+                className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-voca-tangerine-subtle hover:bg-voca-tangerine/20 text-xs font-semibold text-voca-primary transition-all active:scale-95 cursor-pointer disabled:opacity-50"
+                title="Generate a fresh speaking scenario with AI"
+              >
+                <Sparkles className={`w-3.5 h-3.5 text-voca-tangerine ${isGeneratingScenario ? 'animate-spin' : ''}`} />
+                <span>{isGeneratingScenario ? 'Generating...' : 'New AI Topic'}</span>
+              </button>
+              <span className="px-2.5 py-1 rounded-full bg-voca-subtle text-xs font-semibold text-voca-muted tabular-nums">
                 {targetDurationSeconds}s speaking
               </span>
             </div>
           </div>
-          <p className="font-display text-xl text-voca-ink leading-relaxed font-semibold py-2">
-            “{activePrompt}”
-          </p>
+
+          {/* AI Theme & Source Badges */}
+          {scenario && !isGeneratingScenario && (
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              {scenario.context && (
+                <span className="text-xs font-semibold text-voca-ink px-2.5 py-0.5 rounded-md bg-voca-surface-low border border-voca-border">
+                  {scenario.context}
+                </span>
+              )}
+              <span className="text-[10px] uppercase font-bold tracking-wider text-voca-primary bg-voca-tangerine-subtle px-2 py-0.5 rounded-md">
+                {scenario.source === 'ON_DEVICE_AI' ? 'On-Device AI' : scenario.source === 'CLOUD_AI' ? 'Cloud Gemini' : 'Adaptive Bank'}
+              </span>
+            </div>
+          )}
+
+          {/* Prompt Content */}
+          {isGeneratingScenario ? (
+            <div className="py-4 space-y-2.5 animate-pulse">
+              <div className="h-5 bg-voca-surface-low rounded-md w-4/5" />
+              <div className="h-5 bg-voca-surface-low rounded-md w-3/5" />
+            </div>
+          ) : (
+            <p className="font-display text-xl sm:text-2xl text-voca-ink leading-relaxed font-semibold py-2">
+              “{activePrompt}”
+            </p>
+          )}
+
+          {/* AI Focus Tip */}
+          {scenario?.focusTip && !isGeneratingScenario && (
+            <div className="mt-3 pt-3 border-t border-voca-surface-low flex items-start gap-2 text-xs text-voca-muted font-body">
+              <span className="font-bold text-voca-ink shrink-0">Focus tip:</span>
+              <span className="leading-relaxed">{scenario.focusTip}</span>
+            </div>
+          )}
         </div>
 
         {/* 2. Challenge Mission & Focus Points (if challenge mode) */}

@@ -6,6 +6,7 @@ export interface ChallengePromptContext {
   title: string
   mission: string
   skillsAssessed: string[]
+  prompt?: string
 }
 
 export interface BuildCoachingPromptOptions {
@@ -146,6 +147,7 @@ ${
   challengeContext
     ? `- Active Challenge: "${challengeContext.title}"
 - Challenge Mission: "${challengeContext.mission}"
+${challengeContext.prompt ? `- Specific Prompt Answered: "${challengeContext.prompt}"` : ''}
 - Target Skills: ${challengeContext.skillsAssessed.join(', ')}
 ${specificGuide ? `\nChallenge Specific Criteria:\n${specificGuide}` : ''}`
     : '- Mode: Vocal Baseline Assessment (General delivery calibration)'
