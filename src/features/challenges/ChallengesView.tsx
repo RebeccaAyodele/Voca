@@ -37,14 +37,14 @@ export default function ChallengesView() {
     <div className="px-4 sm:px-6 py-8 max-w-xl sm:max-w-4xl mx-auto space-y-6">
       {/* View Header */}
       <div>
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-voca-tangerine-subtle text-voca-primary text-[10px] font-bold uppercase tracking-wider font-display mb-2">
-          <Sparkles className="w-3 h-3 text-voca-tangerine" />
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-voca-tangerine-subtle text-voca-primary text-xs font-bold uppercase tracking-wider font-display mb-2">
+          <Sparkles className="w-3.5 h-3.5 text-voca-tangerine" />
           <span>Daily Practice</span>
         </div>
-        <h1 className="font-display text-3xl font-extrabold text-voca-ink tracking-tight">
+        <h1 className="font-display text-3xl sm:text-4xl font-extrabold text-voca-ink tracking-tight">
           Challenges
         </h1>
-        <p className="text-sm text-voca-muted font-body mt-1">
+        <p className="text-sm sm:text-base text-voca-muted font-body mt-1">
           Small speaking exercises. Real communication growth.
         </p>
       </div>
@@ -53,10 +53,10 @@ export default function ChallengesView() {
       <div className="relative rounded-3xl bg-voca-surface border border-voca-border p-6 shadow-xs overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2 max-w-lg">
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-voca-primary font-display bg-voca-tangerine-subtle px-2.5 py-0.5 rounded-full">
+            <span className="text-xs font-bold uppercase tracking-wider text-voca-primary font-display bg-voca-tangerine-subtle px-3 py-1 rounded-full">
               Today's Challenge
             </span>
-            <span className="flex items-center gap-1 text-xs text-voca-muted font-body">
+            <span className="flex items-center gap-1 text-xs sm:text-sm text-voca-muted font-body">
               <Clock className="w-3.5 h-3.5 text-voca-gold" />
               <span>5–10 min</span>
             </span>
@@ -66,7 +66,7 @@ export default function ChallengesView() {
             {TODAY_DAILY_CHALLENGE.title}
           </h2>
 
-          <p className="text-sm text-voca-muted font-body leading-relaxed">
+          <p className="text-sm sm:text-base text-voca-muted font-body leading-relaxed">
             Can you express a complete thought in just one minute? Practice spontaneous speaking with poise and flow.
           </p>
 

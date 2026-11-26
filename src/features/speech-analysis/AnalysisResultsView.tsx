@@ -229,7 +229,7 @@ export default function AnalysisResultsView() {
   }
 
   return (
-    <div className="bg-voca-canvas text-voca-ink min-h-screen flex flex-col justify-between px-4 sm:px-6 py-6 max-w-lg mx-auto">
+    <div className="bg-voca-canvas text-voca-ink min-h-screen flex flex-col justify-between px-4 sm:px-8 py-6 max-w-3xl mx-auto">
       <div className="flex flex-col w-full pb-6">
         {/* Top Navigation */}
         <header className="flex items-center justify-between w-full mb-4">
@@ -248,17 +248,17 @@ export default function AnalysisResultsView() {
 
         {/* Editorial Headline */}
         <div className="flex flex-col mb-5">
-          <h1 className="font-display text-3xl font-extrabold text-voca-ink leading-tight">
+          <h1 className="font-display text-3xl sm:text-4xl font-extrabold text-voca-ink leading-tight">
             Speech Analysis &amp; <span className="text-voca-tangerine">Results</span>
           </h1>
-          <p className="text-sm text-voca-muted mt-1 leading-relaxed font-body">
+          <p className="text-sm sm:text-base text-voca-muted mt-1 leading-relaxed font-body">
             Deterministic measurements from your voice sample paired with private AI feedback.
           </p>
         </div>
 
         {/* AI Coach Executive Summary Card */}
         {feedback && (
-          <div className="relative rounded-2xl bg-voca-surface p-5 border border-voca-border shadow-xs mb-5">
+          <div className="relative rounded-2xl bg-voca-surface p-5 sm:p-6 border border-voca-border shadow-xs mb-5">
             <div className="flex items-center justify-between pb-3 mb-2 border-b border-voca-surface-low">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-voca-tangerine" />
@@ -270,14 +270,14 @@ export default function AnalysisResultsView() {
                 type="button"
                 onClick={() => setIsDiagnosticsOpen(true)}
                 title="Tap to inspect hybrid AI routing telemetry"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-voca-tangerine-subtle text-voca-primary border border-voca-tangerine/30 hover:bg-voca-tangerine/20 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-voca-tangerine-subtle text-voca-primary border border-voca-tangerine/30 hover:bg-voca-tangerine/20 transition-colors cursor-pointer"
               >
-                <Cpu className="w-3 h-3 text-voca-tangerine" />
+                <Cpu className="w-3.5 h-3.5 text-voca-tangerine" />
                 <span>{feedback.inferenceMetadata.actualSource === 'ON_DEVICE' ? 'On-Device (Nano)' : 'Cloud Gemini'} • Telemetry</span>
               </button>
             </div>
-            <p className="text-sm text-voca-ink leading-relaxed font-body mb-3">{feedback.overallSummary}</p>
-            <p className="text-xs text-voca-muted font-body italic bg-voca-surface-low p-2.5 rounded-xl border border-voca-border/50">
+            <p className="text-sm sm:text-base text-voca-ink leading-relaxed font-body mb-3">{feedback.overallSummary}</p>
+            <p className="text-xs sm:text-sm text-voca-muted font-body italic bg-voca-surface-low p-3 rounded-xl border border-voca-border/50 leading-relaxed">
               {feedback.pacingReview}
             </p>
           </div>
@@ -285,9 +285,9 @@ export default function AnalysisResultsView() {
 
         {/* Plain Everyday Delivery Scorecard */}
         {transcriptMetrics && (
-          <div className="rounded-2xl bg-voca-surface p-5 border border-voca-border shadow-xs mb-5 space-y-3">
+          <div className="rounded-2xl bg-voca-surface p-5 sm:p-6 border border-voca-border shadow-xs mb-5 space-y-3">
             <div className="flex items-center justify-between pb-2 border-b border-voca-surface-low">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-voca-primary font-display">
+              <span className="text-xs font-bold uppercase tracking-wider text-voca-primary font-display">
                 Delivery Breakdown
               </span>
               <span className="text-xs text-voca-muted font-body">
@@ -297,14 +297,14 @@ export default function AnalysisResultsView() {
 
             <div className="grid grid-cols-2 gap-3 pt-1">
               {/* Talking Speed */}
-              <div className="p-3 rounded-xl bg-voca-surface-low border border-voca-border/80">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-voca-muted font-display block">
+              <div className="p-3.5 rounded-xl bg-voca-surface-low border border-voca-border/80">
+                <span className="text-xs uppercase font-bold tracking-wider text-voca-muted font-display block">
                   Talking Speed
                 </span>
-                <span className="font-display font-bold text-base text-voca-ink block mt-0.5">
+                <span className="font-display font-bold text-lg text-voca-ink block mt-0.5">
                   {transcriptMetrics.wordsPerMinute} <span className="text-xs font-normal text-voca-muted">words/min</span>
                 </span>
-                <span className="text-[11px] text-voca-muted font-body block mt-0.5">
+                <span className="text-xs text-voca-muted font-body block mt-0.5">
                   {transcriptMetrics.wordsPerMinute < 115
                     ? 'Deliberate & slow'
                     : transcriptMetrics.wordsPerMinute > 165
@@ -314,14 +314,14 @@ export default function AnalysisResultsView() {
               </div>
 
               {/* Natural Pauses */}
-              <div className="p-3 rounded-xl bg-voca-surface-low border border-voca-border/80">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-voca-muted font-display block">
+              <div className="p-3.5 rounded-xl bg-voca-surface-low border border-voca-border/80">
+                <span className="text-xs uppercase font-bold tracking-wider text-voca-muted font-display block">
                   Natural Pauses
                 </span>
-                <span className="font-display font-bold text-base text-voca-ink block mt-0.5">
+                <span className="font-display font-bold text-lg text-voca-ink block mt-0.5">
                   {signalMetrics?.pauseCount || 0} <span className="text-xs font-normal text-voca-muted">breath pauses</span>
                 </span>
-                <span className="text-[11px] text-voca-muted font-body block mt-0.5">
+                <span className="text-xs text-voca-muted font-body block mt-0.5">
                   {(signalMetrics?.pauseCount || 0) >= 2
                     ? 'Giving ideas room to breathe'
                     : 'Try taking a breath between points'}
@@ -329,14 +329,14 @@ export default function AnalysisResultsView() {
               </div>
 
               {/* Word Fillers */}
-              <div className="p-3 rounded-xl bg-voca-surface-low border border-voca-border/80">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-voca-muted font-display block">
+              <div className="p-3.5 rounded-xl bg-voca-surface-low border border-voca-border/80">
+                <span className="text-xs uppercase font-bold tracking-wider text-voca-muted font-display block">
                   Word Fillers
                 </span>
-                <span className="font-display font-bold text-base text-voca-ink block mt-0.5">
+                <span className="font-display font-bold text-lg text-voca-ink block mt-0.5">
                   {transcriptMetrics.fillerWordCount} <span className="text-xs font-normal text-voca-muted">detected</span>
                 </span>
-                <span className="text-[11px] text-voca-muted font-body block mt-0.5">
+                <span className="text-xs text-voca-muted font-body block mt-0.5">
                   {transcriptMetrics.fillerWordCount === 0
                     ? 'Clean, fluent transitions'
                     : `${transcriptMetrics.fillerPercentage}% of spoken words`}
@@ -344,14 +344,14 @@ export default function AnalysisResultsView() {
               </div>
 
               {/* Directness / Words Spoken */}
-              <div className="p-3 rounded-xl bg-voca-surface-low border border-voca-border/80">
-                <span className="text-[10px] uppercase font-bold tracking-wider text-voca-muted font-display block">
+              <div className="p-3.5 rounded-xl bg-voca-surface-low border border-voca-border/80">
+                <span className="text-xs uppercase font-bold tracking-wider text-voca-muted font-display block">
                   Total Words
                 </span>
-                <span className="font-display font-bold text-base text-voca-ink block mt-0.5">
+                <span className="font-display font-bold text-lg text-voca-ink block mt-0.5">
                   {transcriptMetrics.wordCount} <span className="text-xs font-normal text-voca-muted">words spoken</span>
                 </span>
-                <span className="text-[11px] text-voca-muted font-body block mt-0.5">
+                <span className="text-xs text-voca-muted font-body block mt-0.5">
                   {signalMetrics ? `${signalMetrics.durationSeconds}s total duration` : 'Complete response'}
                 </span>
               </div>
