@@ -1,13 +1,15 @@
 import { useNavigate } from 'react-router-dom'
 import { ArrowRight, Flame, Compass, BookOpen } from 'lucide-react'
 import { useAuthStore } from '@/features/auth/authStore'
-import { TODAY_DAILY_CHALLENGE } from '@/domain/challenges'
+import { getRecommendedDailyChallenge } from '@/domain/challenges'
 
 export default function DashboardView() {
   const navigate = useNavigate()
   const profile = useAuthStore((state) => state.profile)
 
   const displayName = profile?.displayName || (profile?.isAnonymous ? 'Guest' : 'Speaker')
+  const primaryGoal = profile?.goals?.[0]
+  const todayChallenge = getRecommendedDailyChallenge(primaryGoal)
 
   return (
     <div className="px-4 sm:px-6 py-8 max-w-xl mx-auto space-y-6">
@@ -23,7 +25,7 @@ export default function DashboardView() {
         {/* Practice Streak Badge */}
         <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-voca-surface border border-voca-border shadow-2xs">
           <Flame className="w-4 h-4 text-voca-tangerine" />
-          <span className="text-xs font-bold text-voca-ink font-display">3 days</span>
+          <span className="text-xs font-bold text-voca-ink font-display">4 days</span>
         </div>
       </div>
 
@@ -34,25 +36,25 @@ export default function DashboardView() {
             <span className="text-[10px] font-bold uppercase tracking-wider text-voca-primary font-display bg-voca-tangerine-subtle px-2.5 py-0.5 rounded-full">
               Today's Recommended Practice
             </span>
-            <span className="text-xs text-voca-muted font-body">5–10 min</span>
+            <span className="text-xs text-voca-muted font-body">{todayChallenge.estimatedMinutes}</span>
           </div>
 
           <h2 className="font-display text-2xl sm:text-3xl font-extrabold text-voca-ink tracking-tight pt-1">
-            {TODAY_DAILY_CHALLENGE.title}
+            {todayChallenge.title}
           </h2>
 
           <p className="text-sm text-voca-muted font-body leading-relaxed">
-            Can you express a complete thought in just one minute? Practice spontaneous speaking with steady cadence and natural poise.
+            {todayChallenge.tagline}
           </p>
         </div>
 
         {/* Primary Action Button */}
         <button
-          onClick={() => navigate(`/studio?challengeId=${TODAY_DAILY_CHALLENGE.id}`)}
+          onClick={() => navigate(`/studio?challengeId=${todayChallenge.id}`)}
           type="button"
           className="w-full h-14 rounded-full bg-voca-tangerine hover:bg-voca-tangerine-hover text-voca-surface font-display font-bold text-base flex items-center justify-center gap-2 shadow-lg shadow-voca-tangerine/20 cursor-pointer active:scale-[0.98] transition-all"
         >
-          <span>Start Today's Practice (5 mins)</span>
+          <span>Start Today's Practice ({todayChallenge.estimatedMinutes})</span>
           <ArrowRight className="w-5 h-5" />
         </button>
       </div>

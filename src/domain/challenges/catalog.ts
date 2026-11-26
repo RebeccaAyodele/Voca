@@ -279,4 +279,18 @@ export function getChallengesByCategory(categoryId: string): Challenge[] {
   return CHALLENGES.filter((c) => c.categoryId === categoryId)
 }
 
+export function getRecommendedDailyChallenge(primaryGoal?: string): Challenge {
+  if (primaryGoal === 'interview-pitch') {
+    return CHALLENGES.find((c) => c.id === 'the-elevator-pitch') || CHALLENGES[0]!
+  }
+  if (primaryGoal === 'clarity-articulation') {
+    return CHALLENGES.find((c) => c.id === 'make-your-point') || CHALLENGES[0]!
+  }
+  if (primaryGoal === 'social-confidence') {
+    return CHALLENGES.find((c) => c.id === 'five-second-response') || CHALLENGES[0]!
+  }
+  // Default for public-speaking or unset
+  return CHALLENGES[0]! // The 60-Second Challenge
+}
+
 export const TODAY_DAILY_CHALLENGE: Challenge = CHALLENGES[0]! // The 60-Second Challenge

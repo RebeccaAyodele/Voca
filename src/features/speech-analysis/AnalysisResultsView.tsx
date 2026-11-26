@@ -11,10 +11,10 @@ import {
   Cpu,
   RefreshCw,
   RotateCcw,
-  Compass,
   ChevronDown,
   ChevronUp
 } from 'lucide-react'
+import HybridDiagnosticsDrawer from '@/components/diagnostics/HybridDiagnosticsDrawer'
 import { getAudioRecording } from '@/services/persistence/indexed-db'
 import { analyzeAudioSignal, type AudioSignalMetrics } from '@/services/audio/signal-analysis'
 import { calculateTranscriptMetrics, type TranscriptMetrics } from '@/domain/metrics/transcript-metrics'
@@ -37,12 +37,14 @@ export default function AnalysisResultsView() {
   const [recording, setRecording] = useState<AudioRecording | null>(null)
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState(false)
 
   const [transcript, setTranscript] = useState('')
   const [signalMetrics, setSignalMetrics] = useState<AudioSignalMetrics | null>(null)
   const [transcriptMetrics, setTranscriptMetrics] = useState<TranscriptMetrics | null>(null)
   const [feedback, setFeedback] = useState<CoachingFeedback | null>(null)
-  const [isTranscriptOpen, setIsTranscriptOpen] = useState(false)
+  const [isTranscriptOpen, setIsTranscriptOpen] = useState(true)
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
 
@@ -94,6 +96,7 @@ export default function AnalysisResultsView() {
         const goals = profile?.goals || ['public-speaking']
         const challengeContext = challenge
           ? {
+              id: challenge.id,
               title: challenge.title,
               mission: challenge.mission,
               skillsAssessed: challenge.skillsAssessed
@@ -128,34 +131,53 @@ export default function AnalysisResultsView() {
     }
   }
 
-  // Highlight filler words inside the transcript
-  const renderHighlightedTranscript = () => {
+  // Seek and play specific moment in the recording
+  const seekAndPlay = (seconds: number) => {
+    if (!audioRef.current) return
+    audioRef.current.currentTime = Math.max(0, Math.min(seconds, signalMetrics?.durationSeconds || 60))
+    audioRef.current.play()
+    setIsPlaying(true)
+  }
+
+  // Interactive Transcript with Word-Level Seeking & Filler Highlighting
+  const renderInteractiveTranscript = () => {
     if (!transcript) return null
-    if (!transcriptMetrics || transcriptMetrics.fillerWordCount === 0) {
-      return <span>{transcript}</span>
-    }
 
-    const fillerKeys = Object.keys(transcriptMetrics.fillerBreakdown)
-    if (fillerKeys.length === 0) return <span>{transcript}</span>
+    const words = transcript.split(/\s+/).filter(Boolean)
+    const totalWords = words.length
+    const duration = signalMetrics?.durationSeconds || 15
+    const fillerKeys = transcriptMetrics ? Object.keys(transcriptMetrics.fillerBreakdown).map(k => k.toLowerCase()) : []
 
-    const regex = new RegExp(`\\b(${fillerKeys.join('|')})\\b`, 'gi')
-    const parts = transcript.split(regex)
+    return (
+      <div className="flex flex-wrap gap-x-1.5 gap-y-1 text-sm leading-relaxed">
+        {words.map((word, index) => {
+          const cleanWord = word.replace(/[^a-zA-Z']/g, '').toLowerCase()
+          const isFiller = fillerKeys.includes(cleanWord)
+          const estimatedTimestamp = (index / Math.max(1, totalWords)) * duration
+          const isCurrentlyPlaying =
+            currentTime >= estimatedTimestamp &&
+            currentTime < estimatedTimestamp + duration / Math.max(1, totalWords) + 0.3
 
-    return parts.map((part, index) => {
-      const isFiller = fillerKeys.some((f) => f.toLowerCase() === part.toLowerCase())
-      if (isFiller) {
-        return (
-          <span
-            key={index}
-            className="px-1.5 py-0.5 mx-0.5 rounded-md bg-voca-tangerine-subtle font-bold text-voca-primary text-xs"
-            title="Filler word detected"
-          >
-            {part}
-          </span>
-        )
-      }
-      return <span key={index}>{part}</span>
-    })
+          return (
+            <button
+              key={index}
+              type="button"
+              onClick={() => seekAndPlay(estimatedTimestamp)}
+              title={`Jump to ${estimatedTimestamp.toFixed(1)}s: "${word}"`}
+              className={`px-1 py-0.5 rounded transition-all cursor-pointer text-left ${
+                isCurrentlyPlaying
+                  ? 'bg-voca-tangerine text-voca-surface font-bold scale-105 shadow-xs'
+                  : isFiller
+                  ? 'bg-voca-tangerine-subtle text-voca-primary font-bold border border-voca-tangerine/30 hover:bg-voca-tangerine/20'
+                  : 'hover:bg-voca-surface-high text-voca-ink'
+              }`}
+            >
+              {word}
+            </button>
+          )
+        })}
+      </div>
+    )
   }
 
   if (loading) {
@@ -220,10 +242,15 @@ export default function AnalysisResultsView() {
                   Coach Assessment
                 </span>
               </div>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-voca-subtle text-voca-muted">
+              <button
+                type="button"
+                onClick={() => setIsDiagnosticsOpen(true)}
+                title="Tap to inspect hybrid AI routing telemetry"
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-voca-tangerine-subtle text-voca-primary border border-voca-tangerine/30 hover:bg-voca-tangerine/20 transition-colors cursor-pointer"
+              >
                 <Cpu className="w-3 h-3 text-voca-tangerine" />
-                <span>{feedback.inferenceMetadata.actualSource === 'ON_DEVICE' ? 'On-Device (Nano)' : 'Cloud Gemini'}</span>
-              </span>
+                <span>{feedback.inferenceMetadata.actualSource === 'ON_DEVICE' ? 'On-Device (Nano)' : 'Cloud Gemini'} • Telemetry</span>
+              </button>
             </div>
             <p className="text-sm text-voca-ink leading-relaxed font-body mb-3">{feedback.overallSummary}</p>
             <p className="text-xs text-voca-muted font-body italic bg-voca-surface-low p-2.5 rounded-xl border border-voca-border/50">
@@ -336,12 +363,18 @@ export default function AnalysisResultsView() {
             </button>
           </div>
 
-          {/* Collapsible Transcript Content */}
+          {/* Collapsible Transcript Content with Interactive Word Seeking */}
           {isTranscriptOpen && (
-            <div className="mt-4 pt-4 border-t border-voca-surface-low animate-in fade-in duration-150">
-              <p className="text-sm text-voca-ink leading-relaxed font-body">
-                {renderHighlightedTranscript()}
-              </p>
+            <div className="mt-4 pt-4 border-t border-voca-surface-low animate-in fade-in duration-150 space-y-2">
+              <div className="flex items-center justify-between text-[11px] text-voca-muted font-body">
+                <span className="font-display font-semibold uppercase tracking-wider text-[10px]">
+                  Interactive Transcript
+                </span>
+                <span>Tap any word to listen to that exact moment</span>
+              </div>
+              <div className="bg-voca-surface-low p-3.5 rounded-xl border border-voca-border">
+                {renderInteractiveTranscript()}
+              </div>
             </div>
           )}
 
@@ -349,6 +382,7 @@ export default function AnalysisResultsView() {
             <audio
               ref={audioRef}
               src={audioUrl}
+              onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
               onEnded={() => setIsPlaying(false)}
               className="hidden"
             />
@@ -436,7 +470,7 @@ export default function AnalysisResultsView() {
                     type="button"
                     className="h-11 rounded-full bg-voca-surface hover:bg-voca-surface-high border border-voca-border text-voca-ink font-display font-bold text-xs flex items-center justify-center gap-1.5 cursor-pointer"
                   >
-                    <Compass className="w-3.5 h-3.5 text-voca-primary" />
+                    <Sparkles className="w-3.5 h-3.5 text-voca-primary" />
                     <span>Skill Map</span>
                   </button>
                 </div>
@@ -465,6 +499,12 @@ export default function AnalysisResultsView() {
           Return to Studio
         </button>
       </footer>
+
+      {/* Hybrid Diagnostics Inspector Modal */}
+      <HybridDiagnosticsDrawer
+        isOpen={isDiagnosticsOpen}
+        onClose={() => setIsDiagnosticsOpen(false)}
+      />
     </div>
   )
 }
