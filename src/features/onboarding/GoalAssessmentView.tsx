@@ -71,7 +71,7 @@ export default function GoalAssessmentView() {
   }
 
   return (
-    <div className="bg-voca-canvas text-voca-ink min-h-screen flex flex-col justify-between px-4 sm:px-6 py-6 max-w-lg mx-auto">
+    <div className="bg-voca-canvas text-voca-ink min-h-screen min-h-[100dvh] flex flex-col justify-between px-4 sm:px-6 py-4 sm:py-6 max-w-lg mx-auto">
       <div>
         {/* Top Navigation */}
         <div className="flex items-center justify-between py-2 mb-4">
