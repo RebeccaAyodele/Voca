@@ -28,10 +28,14 @@ function saveMockProfile(profile: UserProfile) {
 
 export async function saveUserProfile(profile: UserProfile): Promise<void> {
   if (isFirebaseConfigured) {
-    const db: Firestore = getFirestore(firebaseApp)
-    const userDocRef = doc(db, 'users', profile.uid)
-    await setDoc(userDocRef, profile, { merge: true })
-    return
+    try {
+      const db: Firestore = getFirestore(firebaseApp)
+      const userDocRef = doc(db, 'users', profile.uid)
+      await setDoc(userDocRef, profile, { merge: true })
+      return
+    } catch (err) {
+      console.warn('Firestore saveUserProfile failed or permission denied, saving locally:', err)
+    }
   }
 
   saveMockProfile(profile)
@@ -39,13 +43,17 @@ export async function saveUserProfile(profile: UserProfile): Promise<void> {
 
 export async function getUserProfile(uid: string): Promise<UserProfile | null> {
   if (isFirebaseConfigured) {
-    const db: Firestore = getFirestore(firebaseApp)
-    const userDocRef = doc(db, 'users', uid)
-    const snapshot = await getDoc(userDocRef)
-    if (snapshot.exists()) {
-      return snapshot.data() as UserProfile
+    try {
+      const db: Firestore = getFirestore(firebaseApp)
+      const userDocRef = doc(db, 'users', uid)
+      const snapshot = await getDoc(userDocRef)
+      if (snapshot.exists()) {
+        return snapshot.data() as UserProfile
+      }
+      return null
+    } catch (err) {
+      console.warn('Firestore getUserProfile failed, reading from local fallback:', err)
     }
-    return null
   }
 
   const profiles = getMockProfiles()

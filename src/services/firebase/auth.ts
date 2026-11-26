@@ -88,12 +88,16 @@ export async function signInWithEmail(email: string, password: string): Promise<
 
 export async function signInAsGuest(): Promise<AuthUser> {
   if (isFirebaseConfigured) {
-    const auth = getAuth(firebaseApp)
-    const cred = await fbSignInAnonymously(auth)
-    return {
-      uid: cred.user.uid,
-      email: null,
-      isAnonymous: true
+    try {
+      const auth = getAuth(firebaseApp)
+      const cred = await fbSignInAnonymously(auth)
+      return {
+        uid: cred.user.uid,
+        email: null,
+        isAnonymous: true
+      }
+    } catch (fbErr) {
+      console.warn('Firebase Anonymous Auth provider not enabled in console or failed, falling back to local demo session:', fbErr)
     }
   }
 
