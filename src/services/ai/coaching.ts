@@ -38,9 +38,86 @@ export const CoachingFeedbackSchema = z.object({
 export type CoachingFeedback = z.infer<typeof CoachingFeedbackSchema>
 
 export interface ChallengeContext {
+  id?: string
   title: string
   mission: string
   skillsAssessed: string[]
+}
+
+// Tailored coaching rubrics for each specific speaking challenge
+const CHALLENGE_EVALUATION_GUIDES: Record<string, string> = {
+  'the-60-second-challenge': `
+Evaluate for SPONTANEOUS MOMENTUM & COHERENCE:
+- Did the speaker sustain speech across the 60s without long halts or freezing?
+- Did they connect ideas naturally without rambling into unrelated tangents?
+- Did they bring their thought to a clear, clean conclusion before time ran out?`,
+
+  'five-second-response': `
+Evaluate for QUICK THINKING & IMMEDIATE COMMITTAL:
+- Did the speaker commit to their stance immediately in the very first sentence?
+- Did they avoid apologetic or stalling phrases like "uh, well, I guess, that's tough"?
+- Was the initial thought clear and direct?`,
+
+  'make-your-point': `
+Evaluate for THOUGHT STRUCTURE (Point-Reason-Example-Point):
+- Did they clearly state their point/opinion right away?
+- Did they provide at least one concrete supporting reason?
+- Did they include an example (personal experience, hypothetical, or observation)?
+- Did they end with a decisive takeaway?`,
+
+  'explain-it-simply': `
+Evaluate for PLAIN LANGUAGE & AUDIENCE ADAPTATION:
+- Did the speaker avoid dense jargon and buzzwords?
+- Did they use relatable analogies that anyone (even a beginner) could immediately grasp?
+- Were the sentence structures short, digestible, and easy to follow?`,
+
+  'keep-the-conversation-alive': `
+Evaluate for CONVERSATIONAL WARMTH & BRIDGING:
+- Did they acknowledge the other person's thought with genuine curiosity?
+- Did they share a relevant reflection without completely dominating the floor?
+- Did they finish with an inviting, open-ended question that encourages dialogue?`,
+
+  'first-impressions': `
+Evaluate for PROFESSIONAL WARMTH & CONCISENESS:
+- Was the introduction crisp, grounded, and delivered within 30 seconds?
+- Did they clearly state who they are and what drives their work without overexplaining?
+- Did their vocal tone project authentic warmth and approachable confidence?`,
+
+  'tell-me-a-story': `
+Evaluate for NARRATIVE ARC & ENGAGEMENT:
+- Did the story have a clear beginning (context), middle (conflict or turning point), and end (takeaway)?
+- Did the speaker use expressive, descriptive language rather than a dry list of events?
+- Was the pacing varied to build interest?`,
+
+  'the-mini-presentation': `
+Evaluate for KEYNOTE STRUCTURE & IMPACT:
+- Did they open with a compelling hook in the first 10-15 seconds?
+- Were their main points clearly signposted ("First...", "The key reason...")?
+- Was the closing call-to-action or summary clear and memorable?`,
+
+  'the-elevator-pitch': `
+Evaluate for CONCISENESS & PERSUASIVE CLARITY:
+- Did they clearly articulate the problem, their solution, and why it matters within 45 seconds?
+- Was the value proposition obvious, or was it buried in technical details?
+- Did they sound genuinely invested in the idea?`,
+
+  'read-it-with-expression': `
+Evaluate for VOCAL VARIETY & ARTICULATION:
+- Did the speaker vary their pace and pitch to emphasize key words?
+- Did they use natural pauses at commas and periods to let thoughts land?
+- Were consonant endings clear and distinct without rushing?`,
+
+  'the-mock-interview': `
+Evaluate for STRUCTURED RELEVANCE (STAR method):
+- Did they answer the prompt directly without rambling?
+- Did they provide a structured breakdown of what happened and what action they took?
+- Was their tone composed, professional, and confident?`,
+
+  'recover-gracefully': `
+Evaluate for COMPOSURE UNDER PRESSURE:
+- When a hesitation or stumble occurred, did they take a calm silent breath instead of panicking?
+- Did they resume smoothly without profusely apologizing or losing confidence?
+- Did they finish with poise?`
 }
 
 export async function generateCoachingFeedback(
@@ -52,50 +129,75 @@ export async function generateCoachingFeedback(
 ): Promise<CoachingFeedback> {
   const startTime = Date.now()
 
-  const systemPrompt = `You are Voca, an articulate, encouraging vocal and communication coach.
+  // Find challenge-specific evaluation criteria if available
+  const specificGuide = challengeContext?.id && CHALLENGE_EVALUATION_GUIDES[challengeContext.id]
+    ? CHALLENGE_EVALUATION_GUIDES[challengeContext.id]
+    : challengeContext?.title
+    ? Object.entries(CHALLENGE_EVALUATION_GUIDES).find(([key]) =>
+        challengeContext.title.toLowerCase().replace(/[^a-z0-9]/g, '-').includes(key)
+      )?.[1]
+    : null
+
+  const systemPrompt = `You are Voca, an articulate, encouraging speaking and communication coach.
 Your mission is to provide empathetic, highly actionable, and evidence-grounded feedback to help speakers grow in confidence and presence.
-Never invent quotes or fabricate measurements. Point directly to actual words spoken or measured signal metrics.
+
+BEHIND-THE-SCENES EVALUATION CRITERIA:
+Evaluate the speech across three deep communication layers:
+1. Acoustic & Physical Delivery:
+   - Speaking speed vs natural pacing (130-160 WPM is conversational pocket).
+   - Natural breath pauses between ideas vs mid-sentence hesitation stops.
+   - Grounded terminal cadence (dropping pitch confidently at the end of key sentences).
+2. Thought Structure & Clarity:
+   - Directness: did they get to their point early, or ramble before stating it?
+   - Run-on sentences: did they use natural pauses/periods, or chain thoughts endlessly with "and then, so like"?
+   - Clear structure: Point, Reason, Example, and Conclusion.
+3. Composure Under Pressure:
+   - Steady momentum without freezing or apologetic stalling.
+
+CRITICAL COMMUNICATION RULE FOR YOUR FEEDBACK:
+- Translate all insights into PLAIN, WARM, EVERYDAY LANGUAGE.
+- NEVER use clinical or academic jargon (do NOT say "fundamental frequency F0", "intra-clause phonation", "lexical richness", "syntactic disfluency").
+- Instead use plain terms anyone understands: "Talking Speed", "Natural Pauses", "Word Fillers", "Getting straight to your point", "Breath control".
+- Always cite specific words or phrases actually spoken by the user as evidence. Never fabricate quotes.
 
 Input Details:
 - Transcript: "${transcript}"
-- Speaking Pace: ${transcriptMetrics.wordsPerMinute} WPM (natural target: 130-160 WPM)
-- Filler Word Count: ${transcriptMetrics.fillerWordCount} (${transcriptMetrics.fillerPercentage}% of speech)
+- Talking Speed: ${transcriptMetrics.wordsPerMinute} words per minute (Natural conversational target: 130-160 WPM)
+- Word Fillers: ${transcriptMetrics.fillerWordCount} (${transcriptMetrics.fillerPercentage}% of speech)
 - Detected Fillers: ${JSON.stringify(transcriptMetrics.fillerBreakdown)}
-- Pause Count: ${signalMetrics.pauseCount} pauses (Average duration: ${signalMetrics.averagePauseDuration}s)
+- Breath Pauses: ${signalMetrics.pauseCount} pauses (Average duration: ${signalMetrics.averagePauseDuration}s)
 - Speaker Goals: ${userGoals.join(', ')}
 ${
   challengeContext
-    ? `- Active Challenge: "${challengeContext.title}"\n- Challenge Mission: "${challengeContext.mission}"\n- Target Skills Assessed: ${challengeContext.skillsAssessed.join(', ')}`
-    : ''
+    ? `- Active Challenge: "${challengeContext.title}"
+- Challenge Mission: "${challengeContext.mission}"
+- Target Skills: ${challengeContext.skillsAssessed.join(', ')}
+${specificGuide ? `\nChallenge Specific Criteria:\n${specificGuide}` : ''}`
+    : '- Mode: Vocal Baseline Assessment (General delivery calibration)'
 }
-
-Coaching Guidance:
-- Focus on thought structure, coherence, idea progression, and authentic vocal presence.
-- Do NOT be overly pedantic or nitpick natural conversational sounds. Occasional hesitations are normal human speech. Only point out repetitive crutches if they genuinely obscure clarity.
-${challengeContext ? `- Specifically assess how well the speaker achieved the mission of "${challengeContext.title}".` : ''}
 
 Return a valid JSON object matching this schema:
 {
-  "overallSummary": "Warm, encouraging 2-sentence assessment of their vocal delivery, thought progression, and presence.",
-  "pacingReview": "1-sentence review of their pacing cadence and natural breath pauses.",
+  "overallSummary": "Warm, encouraging 2-sentence assessment of their delivery, thought progression, and presence in plain English.",
+  "pacingReview": "1-sentence review of their talking speed and natural breath pauses.",
   "strengths": [
     {
-      "title": "Clear Vocal Resonance or Idea Structure",
-      "observation": "What specifically worked well in their delivery.",
-      "evidence": "Specific quote or metric from their response."
+      "title": "Clear Strength (e.g. 'Strong Opening Point' or 'Steady Talking Speed')",
+      "observation": "What specifically worked well in their delivery in plain words.",
+      "evidence": "Exact quote from their response that demonstrated this."
     }
   ],
   "improvements": [
     {
-      "area": "Breath Pacing or Idea Articulation",
-      "observation": "What constructive habit was observed.",
-      "recommendation": "One concrete technique to apply next time.",
-      "evidence": "Actual phrase or metric observed."
+      "area": "Focus Area (e.g. 'Natural Pauses' or 'Getting Straight to the Point')",
+      "observation": "What constructive habit was noticed.",
+      "recommendation": "One practical, simple tip they can apply next time.",
+      "evidence": "Exact words or phrase from their response."
     }
   ],
   "nextExercise": {
-    "title": "Name of short drill",
-    "instruction": "Step-by-step instruction for a 30-60 second practice drill.",
+    "title": "Short practical drill name",
+    "instruction": "Simple step-by-step instruction for a 30-45 second practice drill.",
     "targetDurationSeconds": 30
   }
 }`
@@ -138,55 +240,62 @@ Return a valid JSON object matching this schema:
     }
   }
 
-  // Resilient, natural, high-value coach output based on real measured metrics
+  // Resilient, natural, high-value coach fallback grounded in real metrics and challenge context
   const isPaceFast = transcriptMetrics.wordsPerMinute > 165
   const isPaceSlow = transcriptMetrics.wordsPerMinute < 115
   const hasFillers = transcriptMetrics.fillerWordCount > 0
 
   const pacingReview = isPaceFast
-    ? `Your cadence was brisk at ${transcriptMetrics.wordsPerMinute} WPM; introducing intentional micro-pauses will give your key ideas more weight.`
+    ? `Your talking speed was brisk at ${transcriptMetrics.wordsPerMinute} words/min; taking a brief breath between your main ideas will give them more weight.`
     : isPaceSlow
-    ? `Your pace was steady and deliberate at ${transcriptMetrics.wordsPerMinute} WPM, giving listeners plenty of time to absorb each point.`
-    : `Your speaking cadence was balanced at ${transcriptMetrics.wordsPerMinute} WPM, landing right in the natural conversational pocket.`
+    ? `Your talking speed was deliberate at ${transcriptMetrics.wordsPerMinute} words/min, giving your listener time to take in each sentence.`
+    : `Your talking speed was balanced at ${transcriptMetrics.wordsPerMinute} words/min, right in the natural conversational sweet spot.`
+
+  const fallbackStrengths = [
+    {
+      title: challengeContext ? `${challengeContext.title} Momentum` : 'Clear, Natural Presence',
+      observation: challengeContext
+        ? `You tackled the core mission directly, keeping your delivery steady across ${transcriptMetrics.wordCount} words.`
+        : 'Your tone and delivery felt natural and approachable throughout the recording.',
+      evidence: `Spoke ${transcriptMetrics.wordCount} words steadily over ${signalMetrics.durationSeconds} seconds.`
+    }
+  ]
+
+  const fallbackImprovements = [
+    {
+      area: hasFillers ? 'Silent Pauses over Fillers' : isPaceFast ? 'Breath Pauses Between Ideas' : 'Punchy Sentence Endings',
+      observation: hasFillers
+        ? `Used ${transcriptMetrics.fillerWordCount} filler word${transcriptMetrics.fillerWordCount > 1 ? 's' : ''} during transitions.`
+        : isPaceFast
+        ? 'Quick transitions between points without taking a breath.'
+        : 'Opportunity to finish your last sentence with a decisive downward cadence.',
+      recommendation: hasFillers
+        ? 'Whenever you feel like saying "um" or "like", embrace a clean one-second silence instead.'
+        : isPaceFast
+        ? 'Plant a full stop after your first point and take a relaxed belly breath before moving to your next point.'
+        : 'Drop your pitch slightly on your final word to signal confident completion.',
+      evidence: hasFillers
+        ? Object.entries(transcriptMetrics.fillerBreakdown).map(([k, v]) => `"${k}" (${v})`).join(', ')
+        : `${transcriptMetrics.wordsPerMinute} words/min pace`
+    }
+  ]
 
   return {
-    overallSummary: `You opened with calm vocal projection and authentic delivery. Your speech demonstrates strong natural clarity, and with a bit of deliberate pause calibration, your delivery will command any room.`,
+    overallSummary: challengeContext
+      ? `You delivered a thoughtful response to "${challengeContext.title}". Your voice demonstrated steady confidence and direct focus on the prompt.`
+      : `You completed your vocal capture with authentic delivery. Your speech demonstrates clear natural pacing, giving you a strong baseline to build upon.`,
     pacingReview,
-    strengths: [
-      {
-        title: 'Natural Vocal Clarity',
-        observation: 'Your enunciation and tone were steady and approachable throughout the recording.',
-        evidence: `Decoded ${transcriptMetrics.wordCount} words with smooth acoustic energy over ${signalMetrics.durationSeconds}s.`
-      },
-      {
-        title: 'Authentic Framing',
-        observation: 'You structured your thoughts with ease rather than rushing to fill silence.',
-        evidence: `Maintained a steady rhythm across ${signalMetrics.pauseCount} natural breath intervals.`
-      }
-    ],
-    improvements: [
-      {
-        area: hasFillers ? 'Filler Word Awareness' : 'Thoughtful Breath Pauses',
-        observation: hasFillers
-          ? `Detected ${transcriptMetrics.fillerWordCount} filler occurrences (${Object.keys(transcriptMetrics.fillerBreakdown).join(', ')}).`
-          : 'You held steady pace, but taking a full breath between key phrases will amplify gravitas.',
-        recommendation: hasFillers
-          ? 'When you feel a filler word coming, gently close your lips and take a silent breath instead.'
-          : 'Anchor each major transition with a deliberate 1-second pause.',
-        evidence: hasFillers
-          ? `Accounted for ${transcriptMetrics.fillerPercentage}% of your spoken tokens.`
-          : `Average pause length measured at ${signalMetrics.averagePauseDuration}s.`
-      }
-    ],
+    strengths: fallbackStrengths,
+    improvements: fallbackImprovements,
     nextExercise: {
-      title: 'The Silent Breath Transition Drill',
-      instruction: 'Speak for 15 seconds about your favourite project. Every time you switch thoughts, pause silently for one breath instead of using a filler word.',
-      targetDurationSeconds: 15
+      title: 'The One-Second Breath Pause',
+      instruction: 'Speak a 30-second thought, inserting a deliberate silent breath after your opening sentence.',
+      targetDurationSeconds: 30
     },
     inferenceMetadata: {
       requestedMode: 'PREFER_ON_DEVICE',
-      actualSource: 'ON_DEVICE',
-      model: 'gemini-nano',
+      actualSource,
+      model: actualSource === 'ON_DEVICE' ? 'gemini-nano' : 'gemini-1.5-flash',
       latencyMs: Date.now() - startTime
     }
   }

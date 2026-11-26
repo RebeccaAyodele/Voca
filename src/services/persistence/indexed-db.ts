@@ -48,6 +48,18 @@ export async function getAudioRecording(id: string): Promise<AudioRecording | nu
   })
 }
 
+export async function getAllAudioRecordings(): Promise<AudioRecording[]> {
+  const db = await openDB()
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, 'readonly')
+    const store = tx.objectStore(STORE_NAME)
+    const request = store.getAll()
+
+    request.onsuccess = () => resolve(request.result || [])
+    request.onerror = () => reject(request.error)
+  })
+}
+
 export async function deleteAudioRecording(id: string): Promise<void> {
   const db = await openDB()
   return new Promise((resolve, reject) => {

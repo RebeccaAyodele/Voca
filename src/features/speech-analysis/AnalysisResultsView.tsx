@@ -232,36 +232,76 @@ export default function AnalysisResultsView() {
           </div>
         )}
 
-        {/* Human Delivery Rhythm & Pacing */}
+        {/* Plain Everyday Delivery Scorecard */}
         {transcriptMetrics && (
           <div className="rounded-2xl bg-voca-surface p-5 border border-voca-border shadow-xs mb-5 space-y-3">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-voca-primary font-display">
-              Delivery Rhythm
-            </span>
+            <div className="flex items-center justify-between pb-2 border-b border-voca-surface-low">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-voca-primary font-display">
+                Delivery Breakdown
+              </span>
+              <span className="text-xs text-voca-muted font-body">
+                Clear, everyday speech metrics
+              </span>
+            </div>
 
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs font-body">
-                <span className="text-voca-muted">Pacing</span>
-                <span className="font-bold text-voca-ink">
+            <div className="grid grid-cols-2 gap-3 pt-1">
+              {/* Talking Speed */}
+              <div className="p-3 rounded-xl bg-voca-surface-low border border-voca-border/80">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-voca-muted font-display block">
+                  Talking Speed
+                </span>
+                <span className="font-display font-bold text-base text-voca-ink block mt-0.5">
+                  {transcriptMetrics.wordsPerMinute} <span className="text-xs font-normal text-voca-muted">words/min</span>
+                </span>
+                <span className="text-[11px] text-voca-muted font-body block mt-0.5">
                   {transcriptMetrics.wordsPerMinute < 115
-                    ? 'Deliberate & Measured'
-                    : transcriptMetrics.wordsPerMinute > 170
-                    ? 'Energetic & Fast'
-                    : 'Natural & Balanced'}
+                    ? 'Deliberate & slow'
+                    : transcriptMetrics.wordsPerMinute > 165
+                    ? 'A bit fast / rushed'
+                    : 'Natural conversational pace'}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-xs font-body">
-                <span className="text-voca-muted">Flow & Continuity</span>
-                <span className="font-bold text-voca-ink">
-                  {transcriptMetrics.fillerPercentage <= 4 ? 'Smooth & Composed' : 'Natural conversational flow'}
+
+              {/* Natural Pauses */}
+              <div className="p-3 rounded-xl bg-voca-surface-low border border-voca-border/80">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-voca-muted font-display block">
+                  Natural Pauses
+                </span>
+                <span className="font-display font-bold text-base text-voca-ink block mt-0.5">
+                  {signalMetrics?.pauseCount || 0} <span className="text-xs font-normal text-voca-muted">breath pauses</span>
+                </span>
+                <span className="text-[11px] text-voca-muted font-body block mt-0.5">
+                  {(signalMetrics?.pauseCount || 0) >= 2
+                    ? 'Giving ideas room to breathe'
+                    : 'Try taking a breath between points'}
                 </span>
               </div>
-              <div className="flex items-center justify-between text-xs font-body">
-                <span className="text-voca-muted">Pausing</span>
-                <span className="font-bold text-voca-ink">
-                  {signalMetrics && signalMetrics.pauseCount > 0
-                    ? `${signalMetrics.pauseCount} thoughtful breath pauses`
-                    : 'Continuous delivery'}
+
+              {/* Word Fillers */}
+              <div className="p-3 rounded-xl bg-voca-surface-low border border-voca-border/80">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-voca-muted font-display block">
+                  Word Fillers
+                </span>
+                <span className="font-display font-bold text-base text-voca-ink block mt-0.5">
+                  {transcriptMetrics.fillerWordCount} <span className="text-xs font-normal text-voca-muted">detected</span>
+                </span>
+                <span className="text-[11px] text-voca-muted font-body block mt-0.5">
+                  {transcriptMetrics.fillerWordCount === 0
+                    ? 'Clean, fluent transitions'
+                    : `${transcriptMetrics.fillerPercentage}% of spoken words`}
+                </span>
+              </div>
+
+              {/* Directness / Words Spoken */}
+              <div className="p-3 rounded-xl bg-voca-surface-low border border-voca-border/80">
+                <span className="text-[10px] uppercase font-bold tracking-wider text-voca-muted font-display block">
+                  Total Words
+                </span>
+                <span className="font-display font-bold text-base text-voca-ink block mt-0.5">
+                  {transcriptMetrics.wordCount} <span className="text-xs font-normal text-voca-muted">words spoken</span>
+                </span>
+                <span className="text-[11px] text-voca-muted font-body block mt-0.5">
+                  {signalMetrics ? `${signalMetrics.durationSeconds}s total duration` : 'Complete response'}
                 </span>
               </div>
             </div>
