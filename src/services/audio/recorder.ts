@@ -95,6 +95,22 @@ export class AudioRecorderEngine {
     this.mediaRecorder.start(250) // slice every 250ms
   }
 
+  pause(): void {
+    if (this.mediaRecorder && this.mediaRecorder.state === 'recording') {
+      this.mediaRecorder.pause()
+    }
+  }
+
+  resume(): void {
+    if (this.mediaRecorder && this.mediaRecorder.state === 'paused') {
+      this.mediaRecorder.resume()
+    }
+  }
+
+  get state(): RecordingState | 'inactive' {
+    return this.mediaRecorder ? this.mediaRecorder.state : 'inactive'
+  }
+
   async stop(): Promise<AudioRecording> {
     return new Promise((resolve, reject) => {
       if (!this.mediaRecorder) {

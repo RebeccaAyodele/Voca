@@ -1,11 +1,23 @@
 import { useState } from 'react'
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { Home, Mic, TrendingUp, User, Cpu } from 'lucide-react'
 import HybridDiagnosticsDrawer from '@/components/diagnostics/HybridDiagnosticsDrawer'
 
 export default function AppLayout() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [isDiagnosticsOpen, setIsDiagnosticsOpen] = useState(false)
+
+  // In active studio session, hide surrounding layout bars for full-focus immersion matching Stitch
+  const isStudio = location.pathname === '/studio'
+
+  if (isStudio) {
+    return (
+      <div className="bg-voca-canvas text-voca-ink min-h-screen">
+        <Outlet />
+      </div>
+    )
+  }
 
   const navLinks = [
     { to: '/dashboard', label: 'Home', icon: Home },

@@ -3,11 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   ArrowLeft,
   ArrowRight,
-  Mic,
-  Square,
-  Timer,
-  Lock,
-  Volume2,
   RotateCcw,
   Play,
   Pause,
@@ -15,19 +10,26 @@ import {
   Shuffle,
   Target,
   CheckCircle2,
-  Hourglass
+  X,
+  Check,
+  Volume2,
+  Lock,
+  Sparkles
 } from 'lucide-react'
 import { AudioRecorderEngine } from '@/services/audio/recorder'
 import { saveAudioRecording } from '@/services/persistence/indexed-db'
 import { getChallengeById } from '@/domain/challenges'
+import { SoundformBlob } from './SoundformBlob'
 import type { AudioRecording, RecorderStatus } from '@/services/audio/audio-types'
 
 const BASELINE_PROMPT_OPTIONS = [
-  'Think of an idea or project you genuinely care about. In 15 seconds, explain why it matters to someone hearing it for the first time.',
+  'Think of an idea or project you genuinely care about. Explain why it matters to someone hearing it for the first time.',
   'Share an unexpected lesson you learned from a recent challenge, and how it shifted your perspective.',
   'Describe what authentic communication means to you, and the vocal presence you want to embody.',
   'Introduce yourself and the core passion driving your work in three clear, resonant sentences.'
 ]
+
+type StudioStep = 'prompt' | 'prep' | 'recording' | 'review'
 
 export default function SpeakingStudioView() {
   const navigate = useNavigate()
@@ -37,25 +39,26 @@ export default function SpeakingStudioView() {
 
   const isChallengeMode = Boolean(challenge)
   const targetDurationSeconds = challenge ? challenge.speakingDurationSeconds : 15
+  const initialPrepSeconds = challenge ? challenge.prepDurationSeconds : 15
 
   const [promptIndex, setPromptIndex] = useState(0)
+  const [step, setStep] = useState<StudioStep>('prompt')
+  const [prepSecondsLeft, setPrepSecondsLeft] = useState(initialPrepSeconds)
   const [status, setStatus] = useState<RecorderStatus>('idle')
-  const [isPreparing, setIsPreparing] = useState(false)
-  const [prepSecondsLeft, setPrepSecondsLeft] = useState(challenge ? challenge.prepDurationSeconds : 0)
+  const [isPaused, setIsPaused] = useState(false)
   const [secondsElapsed, setSecondsElapsed] = useState(0)
+  const [currentVolume, setCurrentVolume] = useState(0)
   const [recording, setRecording] = useState<AudioRecording | null>(null)
   const [audioUrl, setAudioUrl] = useState<string | null>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  const [waveHeights, setWaveHeights] = useState<number[]>([
-    10, 14, 12, 18, 16, 24, 30, 36, 22, 28, 34, 38, 26, 20, 14, 18, 12, 16, 10
-  ])
-
   const recorderRef = useRef<AudioRecorderEngine | null>(null)
   const timerRef = useRef<NodeJS.Timeout | null>(null)
   const prepTimerRef = useRef<NodeJS.Timeout | null>(null)
   const audioPlayerRef = useRef<HTMLAudioElement | null>(null)
+
+  const activePrompt = challenge ? challenge.speakingPrompt : BASELINE_PROMPT_OPTIONS[promptIndex]
 
   useEffect(() => {
     recorderRef.current = new AudioRecorderEngine()
@@ -76,21 +79,20 @@ export default function SpeakingStudioView() {
     }
   }, [audioUrl])
 
-  const startPreparation = () => {
-    if (!challenge) {
-      startRecording()
-      return
-    }
+  // Step 2: Start 15s preparation countdown
+  const handleStartPrep = () => {
+    setStep('prep')
+    setPrepSecondsLeft(initialPrepSeconds)
 
-    setIsPreparing(true)
-    setPrepSecondsLeft(challenge.prepDurationSeconds)
+    if (prepTimerRef.current) {
+      clearInterval(prepTimerRef.current)
+    }
 
     prepTimerRef.current = setInterval(() => {
       setPrepSecondsLeft((prev) => {
         if (prev <= 1) {
           if (prepTimerRef.current) clearInterval(prepTimerRef.current)
-          setIsPreparing(false)
-          startRecording()
+          handleStartRecording()
           return 0
         }
         return prev - 1
@@ -98,34 +100,45 @@ export default function SpeakingStudioView() {
     }, 1000)
   }
 
-  const skipPreparationAndRecord = () => {
+  // Skip preparation countdown directly into recording
+  const handleSkipPrepToSpeak = () => {
     if (prepTimerRef.current) {
       clearInterval(prepTimerRef.current)
+      prepTimerRef.current = null
     }
-    setIsPreparing(false)
-    startRecording()
+    handleStartRecording()
   }
 
-  const startRecording = async () => {
+  // Step 3: Start active recording
+  const handleStartRecording = async () => {
     try {
       setErrorMessage(null)
       setStatus('requesting')
+      setStep('recording')
+      setIsPaused(false)
+      setSecondsElapsed(0)
 
       if (!recorderRef.current) {
         recorderRef.current = new AudioRecorderEngine()
       }
 
       await recorderRef.current.start((amplitudes) => {
-        setWaveHeights(amplitudes)
+        // Average amplitude normalized to 0..1
+        const avg = amplitudes.reduce((a, b) => a + b, 0) / amplitudes.length
+        const normalized = Math.min(1, Math.max(0, (avg - 8) / 36))
+        setCurrentVolume(normalized)
       })
 
       setStatus('recording')
-      setSecondsElapsed(0)
+
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+      }
 
       timerRef.current = setInterval(() => {
         setSecondsElapsed((prev) => {
           if (prev >= targetDurationSeconds - 1) {
-            stopRecording()
+            handleStopRecording()
             return targetDurationSeconds
           }
           return prev + 1
@@ -133,12 +146,40 @@ export default function SpeakingStudioView() {
       }, 1000)
     } catch (err: unknown) {
       setStatus('error')
+      setStep('prompt')
       const msg = err instanceof Error ? err.message : 'Microphone permission was denied or is unavailable.'
       setErrorMessage(msg)
     }
   }
 
-  const stopRecording = async () => {
+  // Pause / Resume recording toggle
+  const handleTogglePause = () => {
+    if (!recorderRef.current) return
+
+    if (isPaused) {
+      recorderRef.current.resume()
+      setIsPaused(false)
+      timerRef.current = setInterval(() => {
+        setSecondsElapsed((prev) => {
+          if (prev >= targetDurationSeconds - 1) {
+            handleStopRecording()
+            return targetDurationSeconds
+          }
+          return prev + 1
+        })
+      }, 1000)
+    } else {
+      recorderRef.current.pause()
+      setIsPaused(true)
+      if (timerRef.current) {
+        clearInterval(timerRef.current)
+        timerRef.current = null
+      }
+    }
+  }
+
+  // Stop recording and move to review step
+  const handleStopRecording = async () => {
     if (timerRef.current) {
       clearInterval(timerRef.current)
       timerRef.current = null
@@ -154,14 +195,32 @@ export default function SpeakingStudioView() {
       const url = URL.createObjectURL(rec.blob)
       setAudioUrl(url)
       setStatus('stopped')
-      setWaveHeights([10, 14, 12, 18, 16, 24, 30, 36, 22, 28, 34, 38, 26, 20, 14, 18, 12, 16, 10])
+      setStep('review')
+      setCurrentVolume(0)
     } catch (err: unknown) {
       setStatus('error')
-      const msg = err instanceof Error ? err.message : 'Failed to finalize recording.'
+      const msg = err instanceof Error ? err.message : 'Failed to finalize audio recording.'
       setErrorMessage(msg)
     }
   }
 
+  // Restart current session
+  const handleRestartSession = () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
+    }
+    if (recorderRef.current) {
+      recorderRef.current.dispose()
+      recorderRef.current = new AudioRecorderEngine()
+    }
+    setSecondsElapsed(0)
+    setIsPaused(false)
+    setCurrentVolume(0)
+    handleStartRecording()
+  }
+
+  // Discard and re-record
   const handleDiscard = () => {
     if (audioPlayerRef.current) {
       audioPlayerRef.current.pause()
@@ -174,6 +233,7 @@ export default function SpeakingStudioView() {
     setSecondsElapsed(0)
     setIsPlaying(false)
     setStatus('idle')
+    setStep('prompt')
   }
 
   const toggleAudioPlayback = () => {
@@ -203,12 +263,314 @@ export default function SpeakingStudioView() {
     return `${m < 10 ? '0' + m : m}:${s < 10 ? '0' + s : s}`
   }
 
-  const formattedTimer = `${formatMinSec(secondsElapsed)} / ${formatMinSec(targetDurationSeconds)}`
+  // ==========================================
+  // STAGE 3: ACTIVE RECORDING (STITCH FOCUSED)
+  // Matches Stitch screen fd6bf7ee58994227bcbcf0c24d238198
+  // ==========================================
+  if (step === 'recording') {
+    return (
+      <div className="bg-voca-canvas text-voca-ink min-h-screen flex flex-col justify-between overflow-hidden select-none relative">
+        {/* Minimal Top Bar (Subtle exit action + live timer pill) */}
+        <header className="w-full z-50 pt-safe px-6 flex items-center justify-between">
+          <div className="h-16 flex items-center justify-between w-full max-w-md mx-auto">
+            <button
+              aria-label="Exit Session"
+              onClick={() => {
+                if (timerRef.current) clearInterval(timerRef.current)
+                if (recorderRef.current) recorderRef.current.dispose()
+                setStep('prompt')
+              }}
+              className="min-w-[44px] min-h-[44px] -ml-2 rounded-full flex items-center justify-center text-voca-muted hover:text-voca-ink hover:bg-voca-surface-low transition-colors active:scale-95 cursor-pointer"
+              type="button"
+            >
+              <X className="w-6 h-6" />
+            </button>
 
+            {/* Live Timer Pill */}
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-voca-surface border border-voca-border shadow-xs">
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  isPaused ? 'bg-voca-muted' : 'bg-voca-primary animate-pulse'
+                }`}
+              />
+              <span className="font-display font-semibold text-xs tracking-wider text-voca-ink tabular-nums">
+                {formatMinSec(secondsElapsed)} / {formatMinSec(targetDurationSeconds)}
+              </span>
+            </div>
+
+            <div className="min-w-[44px] min-h-[44px]" />
+          </div>
+        </header>
+
+        {/* Central Focal Point: Breathing Voca Acoustic Soundform from Stitch */}
+        <main className="flex-1 flex flex-col items-center justify-center relative w-full px-6 my-auto">
+          <SoundformBlob
+            isRecording={status === 'recording'}
+            isPaused={isPaused}
+            volume={currentVolume}
+          />
+
+          {/* Quiet prompt reminder */}
+          <div className="relative z-10 mt-2 max-w-sm text-center px-4 py-2 rounded-full bg-voca-surface/60 backdrop-blur-xs border border-voca-border/50">
+            <p className="font-body text-xs text-voca-muted line-clamp-1 italic">
+              “{activePrompt}”
+            </p>
+          </div>
+        </main>
+
+        {/* Serene Minimal Bottom Controls (Restart, Record/Pause, Review) */}
+        <footer className="w-full pb-safe px-6 mb-8 flex flex-col items-center justify-center z-50">
+          <div className="w-full max-w-sm flex items-center justify-between px-6">
+            {/* Restart Session */}
+            <button
+              onClick={handleRestartSession}
+              type="button"
+              aria-label="Restart Session"
+              className="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[56px] rounded-full hover:bg-voca-surface-low active:scale-95 transition-all text-voca-muted hover:text-voca-ink group cursor-pointer"
+            >
+              <div className="w-12 h-12 rounded-full bg-voca-surface flex items-center justify-center border border-voca-border shadow-xs group-hover:bg-voca-surface-high transition-colors">
+                <RotateCcw className="w-5 h-5 text-voca-ink" />
+              </div>
+              <span className="font-body text-[11px] font-medium tracking-wide text-voca-muted">
+                Restart
+              </span>
+            </button>
+
+            {/* Main Toggle (Pause / Resume) */}
+            <div className="relative flex items-center justify-center">
+              {!isPaused && (
+                <div className="absolute w-20 h-20 rounded-full bg-voca-tangerine/20 animate-ping pointer-events-none" />
+              )}
+              <button
+                onClick={handleTogglePause}
+                type="button"
+                aria-label={isPaused ? 'Resume recording' : 'Pause recording'}
+                className="relative z-10 w-16 h-16 rounded-full bg-voca-tangerine hover:bg-voca-tangerine-hover text-voca-surface flex items-center justify-center shadow-lg active:scale-90 transition-all cursor-pointer"
+              >
+                {isPaused ? <Play className="w-6 h-6 fill-current ml-0.5" /> : <Pause className="w-6 h-6 fill-current" />}
+              </button>
+            </div>
+
+            {/* Review / Finish Session */}
+            <button
+              onClick={handleStopRecording}
+              type="button"
+              aria-label="Review Session"
+              className="flex flex-col items-center justify-center gap-1 min-w-[56px] min-h-[56px] rounded-full hover:bg-voca-surface-low active:scale-95 transition-all text-voca-muted hover:text-voca-ink group cursor-pointer"
+            >
+              <div className="w-12 h-12 rounded-full bg-voca-tangerine-subtle text-voca-primary flex items-center justify-center border border-voca-tangerine/20 shadow-xs group-hover:bg-voca-tangerine/20 transition-colors">
+                <Check className="w-5 h-5 text-voca-primary" />
+              </div>
+              <span className="font-body text-[11px] font-medium tracking-wide text-voca-muted">
+                Review
+              </span>
+            </button>
+          </div>
+        </footer>
+      </div>
+    )
+  }
+
+  // ==========================================
+  // STAGE 2: PREPARATION PHASE (15 SECONDS)
+  // Shows the topic with the countdown timer
+  // ==========================================
+  if (step === 'prep') {
+    const prepProgress = ((initialPrepSeconds - prepSecondsLeft) / initialPrepSeconds) * 100
+
+    return (
+      <div className="bg-voca-canvas text-voca-ink min-h-screen flex flex-col justify-between px-4 sm:px-6 py-6 max-w-lg mx-auto">
+        <header className="flex items-center justify-between w-full mb-4">
+          <button
+            onClick={() => {
+              if (prepTimerRef.current) clearInterval(prepTimerRef.current)
+              setStep('prompt')
+            }}
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-voca-subtle hover:bg-voca-surface-high transition-colors shadow-xs active:scale-95 cursor-pointer"
+            type="button"
+            aria-label="Cancel preparation"
+          >
+            <ArrowLeft className="w-5 h-5 text-voca-ink" />
+          </button>
+          <span className="text-xs font-bold uppercase tracking-wider text-voca-primary font-display bg-voca-tangerine-subtle px-3 py-1 rounded-full">
+            Preparation Phase
+          </span>
+        </header>
+
+        <main className="flex-1 flex flex-col justify-center my-auto w-full">
+          {/* Active Speaking Prompt Card - Read and gather thoughts */}
+          <div className="w-full rounded-2xl bg-voca-surface p-5 border border-voca-border shadow-xs mb-6">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-voca-muted font-display block mb-2">
+              Your Speaking Prompt
+            </span>
+            <p className="font-display text-xl sm:text-2xl font-semibold text-voca-ink leading-relaxed">
+              “{activePrompt}”
+            </p>
+          </div>
+
+          {/* Central Serene Countdown Ring */}
+          <div className="flex flex-col items-center justify-center text-center my-6">
+            <div className="relative w-36 h-36 flex items-center justify-center mb-4">
+              {/* Circular SVG Ring */}
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="42"
+                  className="stroke-voca-border-subtle"
+                  strokeWidth="5"
+                  fill="none"
+                />
+                <circle
+                  cx="50"
+                  cy="50"
+                  r="42"
+                  className="stroke-voca-tangerine transition-all duration-1000 ease-linear"
+                  strokeWidth="5"
+                  strokeDasharray="264"
+                  strokeDashoffset={264 - (264 * prepProgress) / 100}
+                  strokeLinecap="round"
+                  fill="none"
+                />
+              </svg>
+              <div className="absolute flex flex-col items-center">
+                <span className="font-display text-4xl font-extrabold text-voca-ink tabular-nums">
+                  {prepSecondsLeft}
+                </span>
+                <span className="text-[10px] uppercase font-bold tracking-wider text-voca-muted font-display">
+                  Seconds
+                </span>
+              </div>
+            </div>
+
+            <p className="font-display text-base font-bold text-voca-ink mb-1">
+              Take a calm breath. Gather your thoughts.
+            </p>
+            <p className="font-body text-xs text-voca-muted max-w-xs leading-relaxed">
+              Recording starts automatically when the timer reaches zero, or tap below when ready.
+            </p>
+          </div>
+        </main>
+
+        <footer className="w-full flex flex-col items-center mt-auto pb-4">
+          <button
+            onClick={handleSkipPrepToSpeak}
+            type="button"
+            className="w-full flex items-center justify-center gap-2 h-14 rounded-full bg-voca-tangerine hover:bg-voca-tangerine-hover text-voca-surface font-display font-bold text-base shadow-md active:scale-[0.98] transition-all cursor-pointer"
+          >
+            <span>I'm Ready to Speak</span>
+            <ArrowRight className="w-5 h-5" />
+          </button>
+        </footer>
+      </div>
+    )
+  }
+
+  // ==========================================
+  // STAGE 4: REVIEW & PLAYBACK
+  // ==========================================
+  if (step === 'review') {
+    return (
+      <div className="bg-voca-canvas text-voca-ink min-h-screen flex flex-col justify-between px-4 sm:px-6 py-6 max-w-lg mx-auto">
+        <header className="flex items-center justify-between w-full mb-4">
+          <button
+            onClick={handleDiscard}
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-voca-subtle hover:bg-voca-surface-high transition-colors shadow-xs active:scale-95 cursor-pointer"
+            type="button"
+            aria-label="Discard and return"
+          >
+            <ArrowLeft className="w-5 h-5 text-voca-ink" />
+          </button>
+          <span className="text-xs font-bold uppercase tracking-wider text-voca-primary font-display bg-voca-tangerine-subtle px-3 py-1 rounded-full">
+            Session Take Ready
+          </span>
+        </header>
+
+        <main className="flex-1 flex flex-col justify-center w-full my-auto">
+          {/* Celebratory Tag */}
+          <div className="flex flex-col items-center text-center mb-6">
+            <div className="w-14 h-14 rounded-full bg-voca-tangerine-subtle text-voca-primary flex items-center justify-center mb-3 shadow-xs">
+              <Sparkles className="w-7 h-7" />
+            </div>
+            <h1 className="font-display text-2xl font-bold text-voca-ink">
+              Take captured
+            </h1>
+            <p className="font-body text-xs text-voca-muted mt-1">
+              Duration: {formatMinSec(secondsElapsed)} • Review playback or submit for coaching analysis
+            </p>
+          </div>
+
+          {/* Audio Player Card */}
+          <div className="w-full rounded-2xl bg-voca-surface p-5 border border-voca-border shadow-xs flex flex-col items-center gap-4 mb-6">
+            <div className="flex items-center gap-4">
+              <button
+                onClick={toggleAudioPlayback}
+                type="button"
+                className="flex items-center justify-center w-14 h-14 rounded-full bg-voca-tangerine hover:bg-voca-tangerine-hover text-voca-surface shadow-md cursor-pointer transition-transform active:scale-95"
+                aria-label={isPlaying ? 'Pause playback' : 'Play take'}
+              >
+                {isPlaying ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-0.5" />}
+              </button>
+
+              <div className="flex flex-col">
+                <span className="font-display font-bold text-sm text-voca-ink">
+                  {isPlaying ? 'Playing back take' : 'Listen to your voice'}
+                </span>
+                <span className="font-body text-xs text-voca-muted">
+                  Recorded in local IndexedDB
+                </span>
+              </div>
+            </div>
+
+            {/* Hidden HTML5 Audio Element */}
+            {audioUrl && (
+              <audio
+                ref={audioPlayerRef}
+                src={audioUrl}
+                onEnded={() => setIsPlaying(false)}
+                className="hidden"
+              />
+            )}
+
+            <button
+              onClick={handleDiscard}
+              type="button"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-voca-surface-low border border-voca-border text-xs font-semibold text-voca-muted hover:text-voca-ink transition-colors cursor-pointer"
+            >
+              <RotateCcw className="w-3.5 h-3.5" />
+              <span>Discard & Re-record</span>
+            </button>
+          </div>
+        </main>
+
+        <footer className="w-full flex flex-col items-center mt-auto pb-4 gap-3">
+          <button
+            onClick={handleAnalyze}
+            type="button"
+            className="w-full flex items-center justify-center gap-2 h-14 rounded-full bg-voca-tangerine hover:bg-voca-tangerine-hover text-voca-surface font-display font-bold text-base shadow-md active:scale-[0.98] transition-all cursor-pointer"
+          >
+            <span>Analyze Take & Get Feedback</span>
+            <ArrowRight className="w-5 h-5" />
+          </button>
+          <div className="flex items-center gap-1.5 text-voca-muted">
+            <Lock className="w-3.5 h-3.5 text-voca-muted-subtle" />
+            <span className="text-[11px] text-voca-muted font-body">
+              Speech analysis runs via Firebase Hybrid AI
+            </span>
+          </div>
+        </footer>
+      </div>
+    )
+  }
+
+  // ==========================================
+  // STAGE 1: TOPIC FIRST (PROMPT INTRODUCTION)
+  // Shows topic/prompt BEFORE the 15-second countdown begins!
+  // ==========================================
   return (
     <div className="bg-voca-canvas text-voca-ink min-h-screen flex flex-col justify-between px-4 sm:px-6 py-6 max-w-lg mx-auto">
       <div className="flex flex-col w-full pb-4 select-none">
-        {/* Top Navigation */}
+        {/* Top Header */}
         <header className="flex items-center justify-between w-full mb-4">
           <button
             onClick={() => navigate(isChallengeMode ? '/challenges' : '/onboarding/goals')}
@@ -223,49 +585,17 @@ export default function SpeakingStudioView() {
           </span>
         </header>
 
-        {/* Editorial Headline & Guidance */}
+        {/* Editorial Headline */}
         <div className="flex flex-col mb-4">
           <h1 className="font-display text-3xl font-extrabold text-voca-ink leading-tight">
-            {challenge ? (
-              <>
-                {challenge.title}
-              </>
-            ) : (
-              <>
-                Capture your <span className="text-voca-tangerine">vocal baseline</span>
-              </>
-            )}
+            {challenge ? challenge.title : 'Capture your vocal baseline'}
           </h1>
           <p className="text-sm text-voca-muted mt-1 leading-relaxed font-body">
             {challenge
               ? challenge.tagline
-              : 'Speak naturally for 15 seconds to analyze cadence, pitch variance, and pacing.'}
+              : 'Speak naturally to capture cadence, pitch variance, and speech rhythm.'}
           </p>
         </div>
-
-        {/* Challenge Mission / Focus Points Box (if in challenge mode) */}
-        {challenge && (
-          <div className="mb-4 rounded-2xl bg-voca-surface border border-voca-border p-4 shadow-xs space-y-2">
-            <div className="flex items-center gap-1.5 text-xs font-bold text-voca-primary font-display uppercase tracking-wider">
-              <Target className="w-4 h-4" />
-              <span>Your Mission</span>
-            </div>
-            <p className="text-xs text-voca-ink font-body leading-relaxed">{challenge.mission}</p>
-            <div className="pt-2 border-t border-voca-surface-low">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-voca-muted font-display block mb-1">
-                Focus on:
-              </span>
-              <ul className="space-y-1">
-                {challenge.focusPoints.map((pt, i) => (
-                  <li key={i} className="flex items-center gap-1.5 text-xs text-voca-muted font-body">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-voca-success shrink-0" />
-                    <span>{pt}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        )}
 
         {/* Error notification */}
         {errorMessage && (
@@ -275,11 +605,11 @@ export default function SpeakingStudioView() {
           </div>
         )}
 
-        {/* Prompt Card */}
+        {/* 1. Speaking Prompt Card (Presented First!) */}
         <div className="relative w-full rounded-2xl bg-voca-surface p-5 border border-voca-border shadow-xs mb-4">
           <div className="flex items-center justify-between pb-3 mb-2 border-b border-voca-surface-low">
             <div className="flex items-center gap-1.5">
-              <Mic className="w-4 h-4 text-voca-primary" />
+              <Volume2 className="w-4 h-4 text-voca-primary" />
               <span className="text-[10px] font-bold uppercase tracking-wider text-voca-primary font-display">
                 Speaking Prompt
               </span>
@@ -296,198 +626,77 @@ export default function SpeakingStudioView() {
                   <span>Shuffle</span>
                 </button>
               )}
-              <span className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-voca-subtle text-[10px] font-semibold text-voca-muted tabular-nums">
-                <Timer className="w-3 h-3 text-voca-gold" />
-                {targetDurationSeconds}s
+              <span className="px-2 py-0.5 rounded-full bg-voca-subtle text-[10px] font-semibold text-voca-muted tabular-nums">
+                {targetDurationSeconds}s speaking
               </span>
             </div>
           </div>
-          <p className="font-display text-lg text-voca-ink leading-relaxed font-semibold text-center sm:text-left py-2">
-            “{challenge ? challenge.speakingPrompt : BASELINE_PROMPT_OPTIONS[promptIndex]}”
+          <p className="font-display text-xl text-voca-ink leading-relaxed font-semibold py-2">
+            “{activePrompt}”
           </p>
         </div>
 
-        {/* Preparation Countdown Box (Active during challenge preparation phase) */}
-        {isPreparing && (
-          <div className="mb-4 p-4 rounded-2xl bg-voca-tangerine-subtle/50 border border-voca-tangerine/30 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Hourglass className="w-5 h-5 text-voca-primary animate-spin" />
-              <div>
-                <p className="font-display font-bold text-sm text-voca-ink">
-                  Preparation time: <span className="tabular-nums text-voca-primary">{prepSecondsLeft}s</span>
-                </p>
-                <p className="text-xs text-voca-muted font-body">Gather your thoughts before recording begins.</p>
-              </div>
+        {/* 2. Challenge Mission & Focus Points (if challenge mode) */}
+        {challenge && (
+          <div className="mb-4 rounded-2xl bg-voca-surface border border-voca-border p-4 shadow-xs space-y-3">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-voca-primary font-display uppercase tracking-wider">
+              <Target className="w-4 h-4" />
+              <span>Your Mission</span>
             </div>
-            <button
-              onClick={skipPreparationAndRecord}
-              type="button"
-              className="px-3 py-1.5 rounded-full bg-voca-surface border border-voca-border text-xs font-bold text-voca-ink font-display hover:bg-voca-surface-high transition-colors cursor-pointer"
-            >
-              Skip to speak
-            </button>
+            <p className="text-xs text-voca-ink font-body leading-relaxed">{challenge.mission}</p>
+            <div className="pt-2 border-t border-voca-surface-low">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-voca-muted font-display block mb-1.5">
+                What to focus on:
+              </span>
+              <ul className="space-y-1.5">
+                {challenge.focusPoints.map((pt, i) => (
+                  <li key={i} className="flex items-center gap-2 text-xs text-voca-muted font-body">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-voca-success shrink-0" />
+                    <span>{pt}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
         )}
 
-        {/* Waveform Visualization & Controller */}
-        <div className="flex flex-col items-center justify-center w-full rounded-2xl bg-voca-surface-low p-5 border border-voca-border shadow-xs mb-4 relative overflow-hidden">
-          <div className="absolute w-44 h-44 rounded-full bg-voca-tangerine/10 blur-2xl pointer-events-none"></div>
-
-          {/* Live timer badge */}
-          <div className="flex items-center gap-2 mb-4">
-            <span
-              className={`flex h-2 w-2 rounded-full ${
-                status === 'recording' ? 'bg-voca-tangerine animate-ping' : 'bg-voca-muted'
-              }`}
-            ></span>
-            <span className="font-bold text-sm text-voca-ink tracking-wider tabular-nums font-display">
-              {formattedTimer}
-            </span>
+        {/* Time Structure Breakdown Banner */}
+        <div className="rounded-xl bg-voca-surface-low p-3.5 border border-voca-border/80 flex items-center justify-between text-xs text-voca-muted font-body mb-4">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-voca-tangerine" />
+            <span>Preparation: <strong>{initialPrepSeconds}s</strong></span>
           </div>
-
-          {/* Dynamic Waveform Frequency Bars */}
-          <div className="flex items-center justify-center gap-1.5 w-full h-14 mb-5 px-2">
-            {waveHeights.map((h, i) => (
-              <div
-                key={i}
-                style={{ height: `${h}px` }}
-                className={`w-1 rounded-full transition-all duration-100 ${
-                  status === 'recording'
-                    ? i % 3 === 0
-                      ? 'bg-voca-tangerine'
-                      : i % 2 === 0
-                      ? 'bg-voca-primary'
-                      : 'bg-voca-gold'
-                    : 'bg-voca-border-subtle'
-                }`}
-              />
-            ))}
-          </div>
-
-          {/* Controller Actions */}
-          {status !== 'stopped' ? (
-            <div className="relative flex items-center justify-center">
-              {status === 'recording' && (
-                <div className="absolute w-20 h-20 rounded-full bg-voca-tangerine/20 animate-ping opacity-60"></div>
-              )}
-              <button
-                onClick={
-                  status === 'recording'
-                    ? stopRecording
-                    : isChallengeMode && !isPreparing
-                    ? startPreparation
-                    : startRecording
-                }
-                aria-label={status === 'recording' ? 'Stop recording' : 'Start speaking'}
-                type="button"
-                className={`relative z-10 flex items-center justify-center w-16 h-16 rounded-full text-voca-surface shadow-lg active:scale-95 transition-transform cursor-pointer ${
-                  status === 'recording'
-                    ? 'bg-voca-primary hover:bg-voca-tangerine-hover'
-                    : 'bg-voca-tangerine hover:bg-voca-tangerine-hover'
-                }`}
-              >
-                {status === 'recording' ? <Square className="w-6 h-6 fill-current" /> : <Mic className="w-7 h-7" />}
-              </button>
-            </div>
-          ) : (
-            /* Review & Playback Controller */
-            <div className="flex items-center gap-4 z-10">
-              <button
-                onClick={handleDiscard}
-                type="button"
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-voca-surface border border-voca-border text-voca-muted hover:text-voca-ink text-xs font-semibold cursor-pointer shadow-xs"
-              >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Re-record</span>
-              </button>
-
-              <button
-                onClick={toggleAudioPlayback}
-                type="button"
-                className="flex items-center justify-center w-12 h-12 rounded-full bg-voca-tangerine text-voca-surface shadow-md hover:bg-voca-tangerine-hover cursor-pointer"
-                aria-label={isPlaying ? 'Pause playback' : 'Play recording'}
-              >
-                {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current ml-0.5" />}
-              </button>
-            </div>
-          )}
-
-          {/* Hidden HTML5 Audio Element for Local Playback */}
-          {audioUrl && (
-            <audio
-              ref={audioPlayerRef}
-              src={audioUrl}
-              onEnded={() => setIsPlaying(false)}
-              className="hidden"
-            />
-          )}
-
-          {/* Status Subtitle */}
-          <div className="flex items-center gap-1.5 mt-3 text-voca-muted">
-            <Volume2 className="w-3.5 h-3.5 text-voca-tangerine" />
-            <span className="text-xs font-medium font-body">
-              {status === 'recording'
-                ? 'Recording in progress... speak naturally'
-                : status === 'stopped'
-                ? 'Recording ready • Listen to review or submit for analysis'
-                : isPreparing
-                ? 'Thinking phase... prepare your points'
-                : 'Tap microphone to begin'}
-            </span>
+          <span className="text-voca-border">•</span>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-voca-primary" />
+            <span>Speaking: <strong>{targetDurationSeconds}s</strong></span>
           </div>
         </div>
       </div>
 
-      {/* Bottom Actions */}
-      <footer className="flex flex-col items-center w-full mt-auto pb-2">
-        {/* Step dots (only on baseline) */}
-        {!isChallengeMode && (
-          <div aria-label="Step 4 of 5" className="flex items-center justify-center gap-1.5 mb-4">
-            <span className="h-1.5 w-1.5 rounded-full bg-voca-border-subtle"></span>
-            <span className="h-1.5 w-1.5 rounded-full bg-voca-border-subtle"></span>
-            <span className="h-1.5 w-1.5 rounded-full bg-voca-border-subtle"></span>
-            <span className="h-1.5 w-6 rounded-full bg-voca-tangerine transition-all"></span>
-            <span className="h-1.5 w-1.5 rounded-full bg-voca-border-subtle"></span>
-          </div>
-        )}
+      {/* Primary Bottom Actions */}
+      <footer className="flex flex-col items-center w-full mt-auto pb-2 gap-3">
+        {/* Primary CTA: Start 15s Preparation */}
+        <button
+          onClick={handleStartPrep}
+          type="button"
+          className="w-full flex items-center justify-center gap-2 h-14 rounded-full bg-voca-tangerine hover:bg-voca-tangerine-hover text-voca-surface font-display font-bold text-base shadow-md active:scale-[0.98] transition-all cursor-pointer"
+        >
+          <span>Start {initialPrepSeconds}s Preparation</span>
+          <ArrowRight className="w-5 h-5" />
+        </button>
 
-        {/* Primary Action Button */}
-        {status === 'stopped' ? (
-          <button
-            onClick={handleAnalyze}
-            type="button"
-            className="w-full flex items-center justify-center gap-2 h-14 rounded-full bg-voca-tangerine hover:bg-voca-tangerine-hover text-voca-surface font-display font-bold text-base shadow-md active:scale-[0.98] transition-all cursor-pointer"
-          >
-            <span>Analyze {isChallengeMode ? 'Challenge Response' : 'Voice Baseline'}</span>
-            <ArrowRight className="w-5 h-5" />
-          </button>
-        ) : (
-          <button
-            onClick={
-              status === 'recording'
-                ? stopRecording
-                : isChallengeMode && !isPreparing
-                ? startPreparation
-                : startRecording
-            }
-            type="button"
-            className="w-full flex items-center justify-center gap-2 h-14 rounded-full bg-voca-tangerine hover:bg-voca-tangerine-hover text-voca-surface font-display font-bold text-base shadow-md active:scale-[0.98] transition-all cursor-pointer"
-          >
-            <span>
-              {status === 'recording'
-                ? 'Finish Recording'
-                : isPreparing
-                ? 'Skip Prep & Speak'
-                : isChallengeMode
-                ? 'Start Challenge'
-                : 'Start Baseline Recording'}
-            </span>
-            <ArrowRight className="w-5 h-5" />
-          </button>
-        )}
+        {/* Skip Prep Direct Option */}
+        <button
+          onClick={handleStartRecording}
+          type="button"
+          className="text-xs font-semibold text-voca-muted hover:text-voca-ink py-1 transition-colors cursor-pointer"
+        >
+          Skip preparation and speak immediately
+        </button>
 
-        {/* Privacy Assurance */}
-        <div className="flex items-center justify-center gap-1.5 mt-3 text-voca-muted">
+        {/* Privacy Note */}
+        <div className="flex items-center justify-center gap-1.5 mt-1 text-voca-muted">
           <Lock className="w-3.5 h-3.5 text-voca-muted-subtle" />
           <p className="text-[11px] text-voca-muted-subtle text-center font-body">
             Your recording stays local in IndexedDB until you submit it for analysis.
