@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Sparkles,
@@ -16,12 +16,35 @@ import {
   type Challenge,
   type ChallengeCategoryId
 } from '@/domain/challenges'
+import { getAllSessionResults } from '@/services/persistence/indexed-db'
 import ChallengePreviewModal from './ChallengePreviewModal'
 
 export default function ChallengesView() {
   const navigate = useNavigate()
   const [selectedCategory, setSelectedCategory] = useState<ChallengeCategoryId | null>(null)
   const [previewChallenge, setPreviewChallenge] = useState<Challenge | null>(null)
+  const [completedCount, setCompletedCount] = useState(0)
+  const [streakDays, setStreakDays] = useState(0)
+
+  useEffect(() => {
+    async function loadStats() {
+      const sessions = await getAllSessionResults()
+      const uniqueCompleted = new Set(
+        sessions.filter((s) => s.challengeId).map((s) => s.challengeId)
+      )
+      setCompletedCount(uniqueCompleted.size)
+
+      if (sessions.length > 0) {
+        const days = new Set(
+          sessions.map((s) => new Date(s.createdAt).toISOString().split('T')[0])
+        )
+        setStreakDays(days.size)
+      } else {
+        setStreakDays(0)
+      }
+    }
+    loadStats()
+  }, [])
 
   const activeCategory = CHALLENGE_CATEGORIES.find((c) => c.id === selectedCategory)
   const categoryExercises = selectedCategory
@@ -92,7 +115,7 @@ export default function ChallengesView() {
             <Award className="w-5 h-5" />
           </div>
           <div>
-            <p className="font-display text-xl font-extrabold text-voca-ink tabular-nums">4/12</p>
+            <p className="font-display text-xl font-extrabold text-voca-ink tabular-nums">{completedCount}/{CHALLENGES.length}</p>
             <p className="text-[11px] text-voca-muted font-body">Completed</p>
           </div>
         </div>
@@ -102,7 +125,7 @@ export default function ChallengesView() {
             <Flame className="w-5 h-5 text-voca-tangerine" />
           </div>
           <div>
-            <p className="font-display text-xl font-extrabold text-voca-ink tabular-nums">3 days</p>
+            <p className="font-display text-xl font-extrabold text-voca-ink tabular-nums">{streakDays} {streakDays === 1 ? 'day' : 'days'}</p>
             <p className="text-[11px] text-voca-muted font-body">Practice streak</p>
           </div>
         </div>

@@ -11,7 +11,7 @@ import {
   Zap
 } from 'lucide-react'
 import { useAuthStore } from '@/features/auth/authStore'
-import { getLatestSessionResult, type SessionResult } from '@/services/persistence/indexed-db'
+import { getLatestSessionResult, getAllSessionResults, type SessionResult } from '@/services/persistence/indexed-db'
 import { getAdaptiveRecommendation, type AdaptiveChallengeRecommendation } from '@/domain/challenges/recommendation-engine'
 import VocalWarmupModal from '@/features/speaking-studio/VocalWarmupModal'
 
@@ -20,17 +20,27 @@ export default function DashboardView() {
   const profile = useAuthStore((state) => state.profile)
 
   const [latestSession, setLatestSession] = useState<SessionResult | null>(null)
+  const [streakDays, setStreakDays] = useState(0)
   const [isWarmupOpen, setIsWarmupOpen] = useState(false)
 
   const displayName = profile?.displayName || (profile?.isAnonymous ? 'Guest' : 'Speaker')
   const primaryGoal = profile?.goals?.[0]
 
   useEffect(() => {
-    async function loadLatest() {
-      const latest = await getLatestSessionResult()
+    async function loadData() {
+      const [latest, all] = await Promise.all([
+        getLatestSessionResult(),
+        getAllSessionResults()
+      ])
       setLatestSession(latest)
+      if (all.length > 0) {
+        const days = new Set(all.map((s) => new Date(s.createdAt).toISOString().split('T')[0]))
+        setStreakDays(days.size)
+      } else {
+        setStreakDays(0)
+      }
     }
-    loadLatest()
+    loadData()
   }, [])
 
   const rec: AdaptiveChallengeRecommendation = getAdaptiveRecommendation(latestSession, primaryGoal)
@@ -50,7 +60,7 @@ export default function DashboardView() {
         {/* Practice Streak Badge */}
         <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-voca-surface border border-voca-border shadow-2xs">
           <Flame className="w-4 h-4 text-voca-tangerine" />
-          <span className="text-xs sm:text-sm font-bold text-voca-ink font-display">4 days</span>
+          <span className="text-xs sm:text-sm font-bold text-voca-ink font-display">{streakDays} {streakDays === 1 ? 'day' : 'days'}</span>
         </div>
       </div>
 

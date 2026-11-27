@@ -5,24 +5,24 @@
   --font-body: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
   --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
 
-  --color-voca-tangerine: #f47b45;
-  --color-voca-tangerine-hover: #e2581e;
-  --color-voca-tangerine-subtle: #ffdbce;
-  --color-voca-canvas: #fbf9f5;
-  --color-voca-surface: #ffffff;
-  --color-voca-subtle: #efeeea;
-  --color-voca-surface-low: #f5f3ef;
-  --color-voca-surface-high: #eae8e4;
-  --color-voca-ink: #1b1c1a;
-  --color-voca-muted: #695b58;
-  --color-voca-muted-subtle: #8a7268;
-  --color-voca-border: #eae5df;
-  --color-voca-border-subtle: #dec0b5;
-  --color-voca-primary: #a23f0a;
-  --color-voca-gold: #c79359;
-  --color-voca-success: #25845b;
-  --color-voca-warning: #b7791f;
-  --color-voca-danger: #ba1a1a;
+  --color-voca-tangerine: oklch(0.68 0.17 46);
+  --color-voca-tangerine-hover: oklch(0.60 0.19 42);
+  --color-voca-tangerine-subtle: oklch(0.94 0.04 48);
+  --color-voca-canvas: oklch(0.985 0.006 80);
+  --color-voca-surface: oklch(1 0 0);
+  --color-voca-subtle: oklch(0.95 0.005 80);
+  --color-voca-surface-low: oklch(0.965 0.005 80);
+  --color-voca-surface-high: oklch(0.93 0.006 80);
+  --color-voca-ink: oklch(0.20 0.008 60);
+  --color-voca-muted: oklch(0.48 0.015 45);
+  --color-voca-muted-subtle: oklch(0.58 0.015 45);
+  --color-voca-border: oklch(0.92 0.008 60);
+  --color-voca-border-subtle: oklch(0.85 0.02 50);
+  --color-voca-primary: oklch(0.48 0.15 42);
+  --color-voca-gold: oklch(0.72 0.12 70);
+  --color-voca-success: oklch(0.58 0.14 150);
+  --color-voca-warning: oklch(0.68 0.15 75);
+  --color-voca-danger: oklch(0.52 0.20 25);
 }
 
 :root {

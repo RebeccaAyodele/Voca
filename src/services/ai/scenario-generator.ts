@@ -129,155 +129,155 @@ export const OFFLINE_SCENARIO_BANK: Record<string, Array<{ prompt: string; conte
 
   'keep-the-conversation-alive': [
     {
-      prompt: 'Your colleague says: "I just came back from a two-week solo trip across Japan and it completely reset how I think about my daily routine."',
-      context: 'Conversational warmth & active listening',
-      focusTip: 'Acknowledge their trip with genuine curiosity, share a quick reflection, then ask an open-ended question.'
+      prompt: 'Do you believe social media has brought people closer together or made us more isolated?',
+      context: 'Connection & Digital Life',
+      focusTip: 'Acknowledge multiple angles before stating your personal experience.'
     },
     {
-      prompt: 'A friend mentions: "I am thinking about quitting my stable job to start a coffee roasting business, but my family thinks I am crazy."',
-      context: 'Empathetic validation & constructive inquiry',
-      focusTip: 'Validate their courage without rushing into unsolicited advice, then invite them to elaborate.'
+      prompt: 'Should society normalize taking digital detoxes, and how do you disconnect from screens?',
+      context: 'Mental Health & Technology',
+      focusTip: 'Share a concrete observation and end with an open takeaway.'
     },
     {
-      prompt: 'At a team lunch, someone says: "I read an article arguing that social media has permanently eroded our attention spans."',
-      context: 'Casual debate & group bridging',
-      focusTip: 'Connect their point to your own experience without dominating the floor.'
+      prompt: 'How do you sustain meaningful friendships as life and work get busier?',
+      context: 'Relationships & Community',
+      focusTip: 'Speak with conversational warmth and everyday relatable examples.'
     }
   ],
 
   'first-impressions': [
     {
-      prompt: 'Introduce yourself at an executive design and technology conference. State who you are, what you care about, and why you are here within 30 seconds.',
-      context: 'Professional elevator introduction',
-      focusTip: 'Project approachable warmth and grounded vocal tone.'
+      prompt: 'Introduce yourself, what drives your work, and one value you never compromise on.',
+      context: 'Authentic Self-Introduction',
+      focusTip: 'Project approachable warmth and steady vocal pacing.'
     },
     {
-      prompt: 'You are joining a new cross-functional team. Introduce yourself on a kickoff call in 30 seconds without listing your resume chronologically.',
-      context: 'Team kickoff presence',
-      focusTip: 'Focus on what excites you about collaborating with this team.'
+      prompt: 'What is an idea or initiative you genuinely care about, and why does it matter to you?',
+      context: 'Core Purpose & Mission',
+      focusTip: 'Focus on what excites you rather than reciting credentials.'
     },
     {
-      prompt: 'Introduce yourself to a potential mentor you admire at a networking reception.',
-      context: 'High-stakes networking',
-      focusTip: 'Be concise, respectful of their time, and clear about your curiosity.'
+      prompt: 'Share the most impactful lesson your background has taught you about working with people.',
+      context: 'Personal Perspective',
+      focusTip: 'Keep your delivery concise, confident, and grounded.'
     }
   ],
 
   'tell-me-a-story': [
     {
-      prompt: 'Tell the story of a time when a simple plan went completely off the rails, and how you had to improvise on the spot.',
-      context: 'Narrative arc: Setup, turning point, resolution',
-      focusTip: 'Vary your speaking pace to build tension and land the humorous or meaningful takeaway.'
+      prompt: 'Share a personal experience where a major setback ended up teaching you an invaluable lesson.',
+      context: 'Overcoming Obstacles',
+      focusTip: 'Set the context quickly, build to the turning point, and land on what you learned.'
     },
     {
-      prompt: 'Tell the story of a mentor or leader whose advice seemed wrong or confusing at first, but ended up changing your perspective.',
-      context: 'Character & reflection story',
-      focusTip: 'Bring the listener into the exact room or moment where that conversation happened.'
+      prompt: 'Tell the story of a person or mentor who unexpectedly shifted how you view the world.',
+      context: 'Influence & Growth',
+      focusTip: 'Describe the moment and reflection with emotional honesty.'
     },
     {
-      prompt: 'Tell the story of an unexpected victory or breakthrough that happened right when you were about to give up.',
-      context: 'Resilience narrative',
-      focusTip: 'Describe the sensory details and feelings rather than a dry sequence of dates.'
+      prompt: 'Talk about a moment when you had to stand up for something you believed in.',
+      context: 'Conviction & Courage',
+      focusTip: 'Speak with calm conviction; let key sentences land before continuing.'
     },
     {
-      prompt: 'Tell the story of your first big public mistake at work or school, and what it taught you about accountability.',
-      context: 'Vulnerability and growth',
-      focusTip: 'Speak with calm self-assurance; owning mistakes projects confidence.'
+      prompt: 'Describe a moment in your life where stepping into the unknown opened up a new chapter.',
+      context: 'Exploration & Change',
+      focusTip: 'Use natural pauses to give the story narrative weight.'
     }
   ],
 
   'the-mini-presentation': [
     {
-      prompt: 'Deliver a 90-second keynote opening advocating for Why Deep, Focused Work is the Most Valuable Currency in the Modern Economy.',
-      context: 'Presentation hook and signposting',
-      focusTip: 'Open with an arresting question or statistic in the first 10 seconds.'
+      prompt: 'Speak on why universal access to quality education is the most critical investment for the next decade.',
+      context: 'Education & Global Future',
+      focusTip: 'Structure into: the current gap, the human impact, and the long-term benefit.'
     },
     {
-      prompt: 'Pitch your team on adopting an asynchronous communication culture to replace excessive status meetings.',
-      context: 'Internal workplace presentation',
+      prompt: 'Speak on how modern feminism is evolving to address workplace equity and equal opportunity.',
+      context: 'Gender & Society',
+      focusTip: 'Anchor your points with clear, balanced reasoning.'
+    },
+    {
+      prompt: 'Why is protecting deep, focused attention essential in a world of constant notifications?',
+      context: 'Focus & Productivity',
       focusTip: 'Signpost your points clearly: "First... Second... Finally...".'
-    },
-    {
-      prompt: 'Deliver a 90-second talk on The Art of Saying No Respectfully in Professional Relationships.',
-      context: 'Thought leadership presentation',
-      focusTip: 'Close with an inspiring and memorable call-to-action.'
     }
   ],
 
   'the-elevator-pitch': [
     {
-      prompt: 'Pitch Voca to a product investor in 45 seconds: articulate the core problem (speech anxiety & clinical tools), your solution, and why it wins.',
-      context: 'Product pitch under 45 seconds',
-      focusTip: 'Keep your value proposition front and center without drowning in technical details.'
+      prompt: 'Pitch an initiative that would make higher education accessible and debt-free for every student.',
+      context: 'Education Reform',
+      focusTip: 'State the core problem in 10 seconds and articulate the solution clearly.'
     },
     {
-      prompt: 'Pitch an initiative to create a company-wide paid learning day every month to your executive board.',
-      context: 'Internal business case pitch',
-      focusTip: 'Focus on business return on investment: retention, innovation, and morale.'
+      prompt: 'Pitch an initiative that empowers women in leadership and closes the compensation gap.',
+      context: 'Equity & Leadership',
+      focusTip: 'Focus on measurable positive outcomes and collective benefit.'
     },
     {
-      prompt: 'Pitch yourself for a promotion to lead a high-stakes initiative in 45 seconds.',
-      context: 'Personal career pitch',
-      focusTip: 'Emphasize your track record of delivery and vision for the team.'
+      prompt: 'Pitch a daily habit or practice that helps people manage stress and speak with genuine confidence.',
+      context: 'Human Development',
+      focusTip: 'Keep your message simple, memorable, and actionable.'
     }
   ],
 
   'read-it-with-expression': [
     {
       prompt: '“The greatest communication skill is not speaking with eloquence, but listening with presence. When we pause, when we let silence do the heavy lifting, our words carry weight. Rushing diminishes authority; composure amplifies it.”',
-      context: 'Vocal modulation and punctuation pacing drill',
-      focusTip: 'Pause deliberately for 1 full second at every comma and 2 seconds at the periods.'
+      context: 'Presence & Composure',
+      focusTip: 'Pause deliberately for 1 full second at commas and 2 seconds at periods.'
     },
     {
-      prompt: '“There is a difference between speaking because you have to say something, and speaking because you have something to say. Great speakers do not fill every second with noise; they let key thoughts resonate before moving to the next.”',
-      context: 'Pacing and downward inflection drill',
-      focusTip: 'Drop your pitch on the final word "next" to signal grounded conviction.'
+      prompt: '“Education is not the learning of facts, but the training of the mind to think critically. When people are empowered with knowledge and the freedom to express it, society moves forward.”',
+      context: 'Education & Critical Thought',
+      focusTip: 'Emphasize operative words with purposeful pitch variation.'
     },
     {
-      prompt: '“Confidence is not the absence of nervousness. It is the decision that your message matters more than your hesitation. Take a breath, plant your feet, and deliver your truth.”',
-      context: 'Vocal projection and clarity',
-      focusTip: 'Articulate consonant endings with crisp distinctness.'
+      prompt: '“True equality is not a favor granted by society; it is the fundamental recognition of dignity, agency, and equal voice for every human being.”',
+      context: 'Human Dignity & Equality',
+      focusTip: 'Deliver with steady, grounded conviction and clean consonant articulation.'
     }
   ],
 
   'the-mock-interview': [
     {
-      prompt: '“Tell me about a time you had to deliver difficult feedback to a peer or manager. How did you approach the conversation, and what was the outcome?”',
-      context: 'Behavioral interview (STAR Method: Situation, Task, Action, Result)',
-      focusTip: 'Spend 70% of your time on the Action and Result, not just describing the problem.'
+      prompt: 'How do you approach a constructive disagreement when working with someone whose background is very different from yours?',
+      context: 'Collaboration & Inclusion',
+      focusTip: 'Focus on empathy, mutual respect, and how you find common ground.'
     },
     {
-      prompt: '“Describe a project where the requirements or constraints changed drastically halfway through. How did you adapt your plan and lead your team forward?”',
-      context: 'Adaptability and crisis composure',
-      focusTip: 'Highlight how you maintained calm momentum during uncertainty.'
+      prompt: 'Describe a challenging project where there was no playbook, and how you navigated the ambiguity.',
+      context: 'Problem Solving',
+      focusTip: 'Spend 70% of your time on the concrete actions you took.'
     },
     {
-      prompt: '“What has been your biggest professional failure so far, and how did it change your operating philosophy?”',
-      context: 'Self-awareness & growth mindset',
-      focusTip: 'Be honest and direct; avoid humblebrags like "I worked too hard".'
+      prompt: 'What is a personal philosophy or rule of thumb that guides how you lead and make decisions?',
+      context: 'Leadership & Principles',
+      focusTip: 'Be direct, authentic, and avoid generic clichés.'
     },
     {
-      prompt: '“Tell me about a time you disagreed with a decision made by leadership. What did you do, and how did you handle the final resolution?”',
-      context: 'Disagreement and constructive committal',
-      focusTip: 'Demonstrate disagreement with respect, followed by 100% commitment.'
+      prompt: 'How do you handle high pressure or unexpected setbacks without losing momentum?',
+      context: 'Composure & Resilience',
+      focusTip: 'Demonstrate emotional maturity and deliberate focus.'
     }
   ],
 
   'recover-gracefully': [
     {
-      prompt: 'You are presenting an annual project update to the board. Halfway through, you completely lose your train of thought and your slides fail. Recover your composure, take a calm breath out loud, and smoothly steer the conversation back to your core message.',
-      context: 'Composure under pressure drill',
-      focusTip: 'Do NOT apologize profusely or freeze; breathe calmly, acknowledge simply, and continue with poise.'
+      prompt: 'Speak on what resilience means to you, and how a significant mistake helped you mature.',
+      context: 'Resilience & Self-Awareness',
+      focusTip: 'Speak with calm confidence; owning mistakes projects genuine strength.'
     },
     {
-      prompt: 'A client interrupts your proposal presentation with a sharp, skeptical challenge: "This numbers look completely unrealistic. Why should we believe this?" Recover, acknowledge their concern without becoming defensive, and bridge to your evidence.',
-      context: 'Handling aggressive skepticism',
-      focusTip: 'Keep your vocal pitch low and calm; defensiveness makes your voice rise in pitch.'
+      prompt: 'How can people maintain poise and clear thinking when conversations become tense or controversial?',
+      context: 'Composure Under Pressure',
+      focusTip: 'Keep your vocal pitch grounded and deliberate.'
     },
     {
-      prompt: 'You mispronounce a key client’s name and stumble over a critical figure in front of the entire company. Recover in real time with warmth and zero panic.',
-      context: 'Vocal stumble recovery',
-      focusTip: 'Pause for 1 second, correct with a warm smile in your voice, and proceed immediately.'
+      prompt: 'Why is embracing vulnerability and admitting what you do not know a vital sign of great leadership?',
+      context: 'Authentic Leadership',
+      focusTip: 'Pause for 1 second between ideas to let your points land.'
     }
   ]
 }
@@ -315,21 +315,21 @@ export async function generateDynamicScenario(
       }
     })
 
-    const promptInstruction = `You are Voca's dynamic challenge scenario generator.
-Create ONE fresh, engaging, highly realistic speaking prompt for the speaking exercise: "${challengeId}".
+    const promptInstruction = `You are Voca's speaking prompt generator.
+Create ONE clean, direct, real-world speaking topic or question for the exercise: "${challengeId}".
 
-User's communication goals: ${userGoals.length > 0 ? userGoals.join(', ') : 'Professional eloquence, everyday presence, clear articulation'}
+User's communication goals: ${userGoals.length > 0 ? userGoals.join(', ') : 'Everyday presence, clarity, confident delivery'}
 
-Guidelines for the prompt:
-- Make it realistic, thought-provoking, and tailored to the exercise style (e.g. story arc for storytelling, behavioral challenge for mock interview, concrete question for make-your-point).
-- Avoid cliché or robotic interview questions.
+CRITICAL GUIDELINES:
+- DO NOT invent complex roleplay scenarios. NEVER write "Imagine you are in a room...", "You are speaking to your colleagues...", or "Picture yourself at a conference...".
+- Keep the prompt punchy, clean, and direct (1-2 sentences). Ask a compelling real-world question or topic to speak about (e.g. feminism, universal education, modern work-life balance, how technology impacts relationships, what makes a true leader, etc.).
 - It must be completely different from these previously practiced prompts: ${JSON.stringify(excludePrompts.slice(-3))}
 
 Return ONLY a valid JSON object matching this schema:
 {
-  "prompt": "The exact question or speaking scenario prompt (1-3 sentences)",
-  "context": "Short 2-4 word theme or domain (e.g. 'Team Leadership & Trust')",
-  "focusTip": "One practical speaking focus tip (e.g. 'Commit immediately in your opening sentence')"
+  "prompt": "The clean, direct speaking topic or question (1-2 sentences)",
+  "context": "Short 2-3 word theme (e.g. 'Gender & Equality', 'Modern Education', 'Workplace Culture')",
+  "focusTip": "One practical speaking tip (e.g. 'State your main stance in your very first sentence')"
 }`
 
     const result = await model.generateContent(promptInstruction)

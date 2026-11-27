@@ -134,11 +134,11 @@ export const CHALLENGES: Challenge[] = [
     tagline: 'Answer warmly and toss the conversational ball back.',
     skillsAssessed: ['Responsiveness', 'Listening', 'Conversational flow'],
     mission: 'Respond to a casual remark, share a personal touchpoint, and end with an open question to invite connection.',
-    speakingPrompt: "A colleague says: 'I'm thinking of unplugging and going on a solo camping trip this weekend to clear my head.'",
+    speakingPrompt: "Do you believe social media has brought people closer together or made us more isolated?",
     focusPoints: [
-      'Acknowledge their thought with genuine warmth.',
-      'Share a quick relevant observation or thought.',
-      'Toss the ball back with an open-ended question.'
+      'Acknowledge multiple perspectives with genuine warmth.',
+      'Share a personal reflection or concrete observation.',
+      'Toss the conversational ball back with an open question.'
     ],
     prepDurationSeconds: 15,
     speakingDurationSeconds: 60
@@ -152,7 +152,7 @@ export const CHALLENGES: Challenge[] = [
     tagline: 'Introduce yourself memorably in under 45 seconds.',
     skillsAssessed: ['Confidence', 'Clarity', 'Introductions'],
     mission: 'Deliver a warm, concise self-introduction that highlights who you are, what you care about, and sparks curiosity.',
-    speakingPrompt: "You're at a networking gathering or team kickoff. Introduce who you are and one thing you're genuinely excited about right now.",
+    speakingPrompt: "Introduce yourself, what drives your work, and one value you never compromise on.",
     focusPoints: [
       'State your name with clear vocal presence.',
       'Focus on what excites you, not just credentials.',
@@ -170,7 +170,7 @@ export const CHALLENGES: Challenge[] = [
     tagline: 'Make your stories engaging with clear narrative arc.',
     skillsAssessed: ['Narrative structure', 'Expression'],
     mission: 'Craft a vivid 90-second story with setting, a turning point or conflict, and a meaningful resolution.',
-    speakingPrompt: 'Tell a story about a time something went completely off-script, and how you navigated it.',
+    speakingPrompt: 'Share a personal experience where a major setback ended up teaching you an invaluable lesson.',
     focusPoints: [
       'Set the scene in the first 10 seconds.',
       'Build to the decisive moment or turning point.',
@@ -188,7 +188,7 @@ export const CHALLENGES: Challenge[] = [
     tagline: 'Present with confidence, structure, and audience engagement.',
     skillsAssessed: ['Structure', 'Delivery', 'Audience engagement'],
     mission: 'Present an idea cleanly to a group: capture attention, articulate two supporting points, and leave a memorable closing.',
-    speakingPrompt: 'Present why regular walking or movement during the workday dramatically improves creative problem solving.',
+    speakingPrompt: 'Speak on why universal access to quality education is the most critical investment for the next decade.',
     focusPoints: [
       'Open with a compelling hook or provocative question.',
       'Deliver two distinct, well-paced arguments.',
@@ -224,7 +224,7 @@ export const CHALLENGES: Challenge[] = [
     tagline: 'Distill a high-impact proposition in 45 seconds flat.',
     skillsAssessed: ['Conciseness', 'Persuasion', 'Clarity'],
     mission: 'Hook the listener with a painful problem, introduce the elegant solution, and state the value clearly.',
-    speakingPrompt: 'Pitch an innovative product, service, or tool that solves a daily frustration you deal with regularly.',
+    speakingPrompt: 'Pitch an initiative that would make higher education accessible and debt-free for every student.',
     focusPoints: [
       'Hook with the specific friction.',
       'Clearly explain the unique advantage.',
@@ -239,10 +239,10 @@ export const CHALLENGES: Challenge[] = [
     categoryId: 'public-speaking',
     difficulty: 'Advanced',
     estimatedMinutes: '3–5 min',
-    tagline: 'Structure a behavioral interview response with composure.',
+    tagline: 'Structure a thoughtful response with composure.',
     skillsAssessed: ['Structure', 'Responsiveness', 'Composure'],
-    mission: 'Answer a classic behavioral question with composure: Situation, Task, Action, and Result.',
-    speakingPrompt: 'Tell me about a time you had a strong disagreement with a team member or leader. How did you handle it?',
+    mission: 'Answer directly with composure: state your philosophy, describe your actions, and share the outcome.',
+    speakingPrompt: 'How do you approach a constructive disagreement when working with someone whose background is very different from yours?',
     focusPoints: [
       'Give quick context without getting bogged down in backstory.',
       'Focus 60% of your time on YOUR specific actions.',
@@ -259,8 +259,8 @@ export const CHALLENGES: Challenge[] = [
     estimatedMinutes: '2–3 min',
     tagline: 'Stay composed when speaking and pivot smoothly under pressure.',
     skillsAssessed: ['Composure', 'Adaptability', 'Fluency'],
-    mission: 'Start speaking, deliberately pause at 20 seconds as if you lost your thought, take a calm breath, and bridge back smoothly without apologizing profusely.',
-    speakingPrompt: "Explain an idea you find fascinating. Halfway through, take a 2-second silent breath, reset your posture, and bridge back with 'What this highlights most is...' and finish strong.",
+    mission: 'Start speaking, deliberately pause as if you lost your thought, take a calm breath, and bridge back smoothly without apologizing profusely.',
+    speakingPrompt: "Speak on what resilience means to you, and how a significant mistake helped you mature.",
     focusPoints: [
       "Do not say 'Sorry' or panic.",
       'Use silence as a sign of poise.',
