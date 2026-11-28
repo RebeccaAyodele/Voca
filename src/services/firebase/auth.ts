@@ -120,17 +120,23 @@ export async function signInAsGuest(): Promise<AuthUser> {
 
 export async function signOut(): Promise<void> {
   if (isFirebaseConfigured) {
-    const auth = getAuth(firebaseApp)
-    await fbSignOut(auth)
+    try {
+      const auth = getAuth(firebaseApp)
+      await fbSignOut(auth)
+    } catch (err) {
+      console.warn('Firebase sign out error:', err)
+    }
   }
   setMockUser(null)
   notifyMockListeners(null)
 }
 
 export function subscribeToAuthState(callback: (user: AuthUser | null) => void): () => void {
+  mockListeners.push(callback)
+
   if (isFirebaseConfigured) {
     const auth = getAuth(firebaseApp)
-    return onAuthStateChanged(auth, (user: FirebaseUser | null) => {
+    const fbUnsubscribe = onAuthStateChanged(auth, (user: FirebaseUser | null) => {
       if (user) {
         callback({
           uid: user.uid,
@@ -138,14 +144,24 @@ export function subscribeToAuthState(callback: (user: AuthUser | null) => void):
           isAnonymous: user.isAnonymous
         })
       } else {
-        callback(null)
+        // Fall back to local mock/demo user if active (e.g. guest judges mode)
+        const localUser = getMockUser()
+        if (localUser) {
+          callback(localUser)
+        } else {
+          callback(null)
+        }
       }
     })
+
+    return () => {
+      fbUnsubscribe()
+      mockListeners = mockListeners.filter((l) => l !== callback)
+    }
   }
 
-  mockListeners.push(callback)
   callback(getMockUser())
   return () => {
-    mockListeners = mockListeners.filter(l => l !== callback)
+    mockListeners = mockListeners.filter((l) => l !== callback)
   }
 }

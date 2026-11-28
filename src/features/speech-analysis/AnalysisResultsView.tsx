@@ -76,9 +76,9 @@ export default function AnalysisResultsView() {
         if (!active) return
         setSignalMetrics(sig)
 
-        // Stage 2: Transcribe via cloud AI
-        setLoadingStage('Transcribing speech verbatim via Firebase AI...')
-        const text = await transcribeAudio(rec.blob)
+        // Stage 2: Transcribe via cloud AI (with on-device live speech recognition fallback)
+        setLoadingStage('Transcribing speech verbatim...')
+        const text = await transcribeAudio(rec.blob, rec.liveTranscript)
         if (!active) return
         setTranscript(text)
 

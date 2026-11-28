@@ -17,6 +17,30 @@ function getSupportedMimeType(): string {
   return 'audio/webm'
 }
 
+// Minimal interface for browser SpeechRecognition
+interface SpeechRecognitionInstance {
+  continuous: boolean
+  interimResults: boolean
+  lang: string
+  start: () => void
+  stop: () => void
+  abort: () => void
+  onresult: ((event: SpeechRecognitionEventLike) => void) | null
+  onerror: ((event: unknown) => void) | null
+}
+
+interface SpeechRecognitionEventLike {
+  results: {
+    [index: number]: {
+      [index: number]: {
+        transcript: string
+      }
+      isFinal?: boolean
+    }
+    length: number
+  }
+}
+
 export class AudioRecorderEngine {
   private mediaRecorder: MediaRecorder | null = null
   private audioStream: MediaStream | null = null
@@ -26,6 +50,8 @@ export class AudioRecorderEngine {
   private startTime = 0
   private mimeType = ''
   private animFrameId: number | null = null
+  private recognition: SpeechRecognitionInstance | null = null
+  private speechTranscript = ''
 
   async start(onWaveformData?: (normalizedAmplitudes: number[]) => void): Promise<void> {
     if (!navigator.mediaDevices?.getUserMedia) {
@@ -34,6 +60,7 @@ export class AudioRecorderEngine {
 
     this.mimeType = getSupportedMimeType()
     this.chunks = []
+    this.speechTranscript = ''
 
     this.audioStream = await navigator.mediaDevices.getUserMedia({
       audio: {
@@ -44,7 +71,9 @@ export class AudioRecorderEngine {
     })
 
     // Setup Web Audio API Analyser for real-time live waveform
-    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
+    const AudioContextClass =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext
     if (AudioContextClass) {
       this.audioContext = new AudioContextClass()
       const source = this.audioContext.createMediaStreamSource(this.audioStream)
@@ -79,6 +108,38 @@ export class AudioRecorderEngine {
 
         this.animFrameId = requestAnimationFrame(updateWaveform)
       }
+    }
+
+    // Try starting native browser speech recognition for zero-latency local transcription
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const SpeechRecognitionClass = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+      if (SpeechRecognitionClass) {
+        this.recognition = new SpeechRecognitionClass() as SpeechRecognitionInstance
+        this.recognition.continuous = true
+        this.recognition.interimResults = true
+        this.recognition.lang = 'en-US'
+
+        this.recognition.onresult = (event: SpeechRecognitionEventLike) => {
+          let accumulated = ''
+          for (let i = 0; i < event.results.length; i++) {
+            const result = event.results[i]
+            if (result && result[0]) {
+              accumulated += result[0].transcript + ' '
+            }
+          }
+          this.speechTranscript = accumulated.trim()
+        }
+
+        this.recognition.onerror = () => {
+          // Non-blocking: fail quietly if browser recognition encounters mic conflict
+        }
+
+        this.recognition.start()
+      }
+    } catch {
+      // Non-fatal if SpeechRecognition is blocked or unsupported
+      this.recognition = null
     }
 
     this.mediaRecorder = new MediaRecorder(this.audioStream, {
@@ -119,6 +180,12 @@ export class AudioRecorderEngine {
 
       const durationSeconds = Math.max(1, Math.round((Date.now() - this.startTime) / 1000))
 
+      if (this.recognition) {
+        try {
+          this.recognition.stop()
+        } catch {}
+      }
+
       this.mediaRecorder.onstop = () => {
         if (this.animFrameId) {
           cancelAnimationFrame(this.animFrameId)
@@ -142,7 +209,8 @@ export class AudioRecorderEngine {
           blob,
           mimeType: this.mimeType,
           durationSeconds,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          liveTranscript: this.speechTranscript ? this.speechTranscript.trim() : undefined
         }
 
         resolve(recording)
@@ -153,6 +221,12 @@ export class AudioRecorderEngine {
   }
 
   dispose(): void {
+    if (this.recognition) {
+      try {
+        this.recognition.abort()
+      } catch {}
+      this.recognition = null
+    }
     if (this.animFrameId) {
       cancelAnimationFrame(this.animFrameId)
     }

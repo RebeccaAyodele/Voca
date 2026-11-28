@@ -4,6 +4,7 @@ export interface AudioRecording {
   mimeType: string
   durationSeconds: number
   createdAt: string
+  liveTranscript?: string
 }
 
 export type RecorderStatus = 'idle' | 'requesting' | 'recording' | 'paused' | 'stopped' | 'error'

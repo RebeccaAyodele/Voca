@@ -81,7 +81,7 @@ export default function ProfileView() {
   }
 
   return (
-    <div className="px-4 sm:px-6 py-8 max-w-xl mx-auto space-y-6">
+    <div className="px-4 sm:px-6 py-8 max-w-xl mx-auto space-y-6 pb-28 md:pb-12">
       {/* Header */}
       <div>
         <h1 className="font-display text-3xl font-extrabold text-voca-ink tracking-tight">

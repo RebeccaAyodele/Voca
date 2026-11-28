@@ -15,7 +15,8 @@ async function blobToBase64(blob: Blob): Promise<string> {
   })
 }
 
-export async function transcribeAudio(audioBlob: Blob): Promise<string> {
+export async function transcribeAudio(audioBlob: Blob, liveWebTranscript?: string): Promise<string> {
+  // If cloud AI is configured, attempt high-fidelity transcription via Gemini Flash
   if (isFirebaseConfigured) {
     try {
       const ai = getAI(firebaseApp, { backend: new GoogleAIBackend() })
@@ -41,10 +42,15 @@ export async function transcribeAudio(audioBlob: Blob): Promise<string> {
         return text.trim()
       }
     } catch (err) {
-      console.warn('Firebase AI cloud transcription encountered an error, falling back to simulated transcript:', err)
+      console.warn('Firebase AI cloud transcription unavailable, falling back to local speech capture:', err)
     }
   }
 
-  // Graceful fallback transcript for demo / offline development
-  return 'Hello, my name is Alex. Growing up, I was always passionate about building tools that help people communicate with conviction. Last year, I led my team through a major product launch under tight deadlines, and learning to stay calm, pause deliberately, and speak with resonance made all the difference.'
+  // If live on-device speech recognition was captured during recording, return the user's real spoken words
+  if (liveWebTranscript && liveWebTranscript.trim().length > 0) {
+    return liveWebTranscript.trim()
+  }
+
+  // Honest fallback message per Voca product principles: never fabricate fake speech transcripts
+  return '[Speech recorded. Acoustic cadence, pausing, and delivery were measured directly from the physical audio signal.]'
 }

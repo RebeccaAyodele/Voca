@@ -57,7 +57,7 @@ export default function ChallengesView() {
   }
 
   return (
-    <div className="px-4 sm:px-6 py-8 max-w-xl sm:max-w-4xl mx-auto space-y-6">
+    <div className="px-4 sm:px-6 py-8 max-w-xl sm:max-w-4xl mx-auto space-y-6 pb-28 md:pb-12">
       {/* View Header */}
       <div>
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-voca-tangerine-subtle text-voca-primary text-xs font-bold uppercase tracking-wider font-display mb-2">

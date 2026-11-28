@@ -47,7 +47,7 @@ export default function DashboardView() {
   const todayChallenge = rec.challenge
 
   return (
-    <div className="px-4 sm:px-8 py-8 max-w-3xl mx-auto space-y-6">
+    <div className="px-4 sm:px-8 py-8 max-w-3xl mx-auto space-y-6 pb-28 md:pb-12">
       {/* Welcome & Streak Header */}
       <div className="flex items-center justify-between">
         <div>
